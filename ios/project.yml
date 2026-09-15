@@ -56,3 +56,26 @@ targets:
         CURRENT_PROJECT_VERSION: "1"
         SKIP_INSTALL: YES
         ENABLE_PREVIEWS: YES
+
+# Without this, XcodeGen auto-generates a separate runnable-looking scheme
+# for every target, including the widget extension - which can't be
+# launched standalone the normal way and greys out Run if it's the one
+# selected in the scheme picker. Defining schemes explicitly here means
+# there's exactly one scheme ("SickleShield") to pick, and it builds both
+# targets together (the extension embeds into the app automatically).
+schemes:
+  SickleShield:
+    build:
+      targets:
+        SickleShield: all
+        SickleShieldWidgets: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release

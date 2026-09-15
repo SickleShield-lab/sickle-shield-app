@@ -57,9 +57,21 @@ ios/
 5. Open `SickleShield.xcodeproj` in Xcode.
 6. In the project settings under **Signing & Capabilities**, set your own Apple Developer Team **for both the `SickleShield` and `SickleShieldWidgets` targets**, and adjust `PRODUCT_BUNDLE_IDENTIFIER` in `project.yml` if `com.sickleshield.app`/`com.sickleshield.app.widgets` aren't available to you, then re-run `xcodegen generate`.
 7. **This is the step most likely to need manual fixing**: Xcode needs to actually register the App Group. With the `SickleShield` target selected, go to Signing & Capabilities and confirm `group.com.sickleshield.app` shows under App Groups (it should already be listed from the entitlements file XcodeGen wrote) - if Xcode shows an error instead of a checkmark, click the group, let Xcode create/register it with your team, then repeat for the `SickleShieldWidgets` target so both point at the exact same group ID. Multi-target + App Group + widget extension wiring is the one part of this project I could not verify at all without Xcode itself, so treat this step as the most likely place for something to need a manual nudge.
-8. Pick an iPhone simulator and hit Run. To see the widget, long-press the simulator's home screen and add it; the Live Activity appears automatically the next time you trigger SOS.
+8. In the toolbar's **scheme picker** (next to the Run/Stop buttons, top-left), make sure **"SickleShield"** is selected - not "SickleShieldWidgets" (that one's the extension and can't run standalone in the normal sense). In the **destination picker** right next to it, pick any iPhone Simulator.
+9. Hit Run (▶). To see the widget afterward, long-press the simulator's home screen and add it; the Live Activity appears automatically the next time you trigger SOS.
 
-Whenever `project.yml` changes (new files usually don't need this - XcodeGen picks up anything under `SickleShield/` automatically - but target settings, new frameworks, etc. do), re-run `xcodegen generate`.
+**Whenever `project.yml` changes**, re-run `xcodegen generate` from the `ios/` folder to regenerate the `.xcodeproj` (new Swift files under existing folders don't need this - XcodeGen picks those up automatically - but target settings, schemes, new frameworks, etc. do).
+
+### Troubleshooting: Run button greyed out
+
+In order of likelihood:
+
+1. **Wrong scheme selected.** This project has two targets (the app and the widget extension), and Xcode's scheme picker can end up pointed at "SickleShieldWidgets" instead of "SickleShield." I've since pinned `project.yml` to generate only one scheme ("SickleShield") to remove this trap entirely - if you hit this, re-run `xcodegen generate` to pick up that fix, then reopen the project.
+2. **No destination selected**, or the destination picker is empty. Click it (next to the scheme picker) and pick any iPhone Simulator. If none are listed, go to Xcode > Settings > Platforms and download an iOS simulator runtime.
+3. **Still indexing.** A fresh multi-target project can take a minute or two to finish processing after first opening - watch for a progress bar in the top-center status area. Run stays disabled until that finishes.
+4. **No Team selected for signing.** Even for Simulator-only runs, Xcode sometimes wants a Team set. Select the `SickleShield` target > Signing & Capabilities > pick your Apple ID under Team (do this for `SickleShieldWidgets` too).
+
+If none of those explain it, send me the exact state of the scheme/destination pickers (a screenshot of the Xcode toolbar) and whatever's in the Issue Navigator (the ⚠️/❌ tab in the left sidebar).
 
 ## What's implemented
 
@@ -85,7 +97,7 @@ All five tabs, wired to the real backend, with the exact visual language from th
 - **Home Screen widget** (`SickleShieldWidgets/PainWidget.swift`): shows pain score and water intake without opening the app. Updates whenever the app fetches fresh data (via an App Group + `WidgetCenter.reloadAllTimelines()`), plus a once-an-hour timeline refresh as a safety net.
 - **Live Activity** (`SickleShieldWidgets/CrisisLiveActivity.swift`): starts automatically when SOS fires, showing severity and who was alerted on the Lock Screen and Dynamic Island. Ends via "Mark crisis as resolved" on the Emergency tab.
 
-**This is the part of the whole project I'd flag as highest-risk without a Mac to test on.** Adding a widget extension target by hand-editing a YAML spec (rather than through Xcode's own "New Target" wizard, which handles a lot of this invisibly) is the trickiest Xcode configuration in this codebase - multi-target builds, an App Group shared between two bundle IDs, and a Live Activity's data type needing to live in both targets at once. I validated every YAML/plist file for syntactic correctness (no macOS needed for that), but semantic correctness inside Xcode itself is unverified. See step 7 in setup above.
+**This was the part of the whole project flagged as highest-risk before a Mac was available to test on**, and it's exactly where the first real bug showed up (the scheme-picker issue above) - adding a widget extension target by hand-editing a YAML spec (rather than through Xcode's own "New Target" wizard, which handles a lot of this invisibly) is the trickiest Xcode configuration in this codebase. If you hit anything else in this area (App Group registration, the widget not appearing, Live Activity not showing), send the exact error and I'll fix it.
 
 ### Deliberately not attempted
 
@@ -94,6 +106,20 @@ All five tabs, wired to the real backend, with the exact visual language from th
 - **Apple Wallet pass** - hard-blocked, not just harder to test: generating a `.pkpass` requires a Pass Type ID certificate that only exists once you're enrolled in the paid Apple Developer Program. Nothing to build yet.
 - **Blood donor matching and peer support community** - product-safety/moderation design problems (liability, verifying claims, content moderation) more than engineering ones; deliberately not started until that design conversation happens.
 - **Telehealth video** - needs picking and paying for a vendor (Twilio/Agora/Daily.co); not started pending that decision.
+
+## How to test each feature
+
+You need the backend reachable from wherever Xcode is running it. Simplest path on your Mac: clone `backend/spectre0110-backend-main`, `npm install`, fill in `.env` (see its own README), and `npm run dev` - the Simulator can reach `http://localhost:5006` directly since it shares your Mac's network stack (a physical device needs your Mac's LAN IP instead - see `APIConfig.swift`).
+
+1. **Auth** - Sign up, then check the email inbox you used for the OTP (see the "known issue" below - this currently fails against the real mail server). Or just log in if you already seeded a user (see the backend's test tooling from our earlier session, or create one directly).
+2. **Explore** - After logging in, you should see your name, pain/water/weight tiles, and the risk score card. The risk score needs Location permission (for weather) - accept the prompt.
+3. **Tracker** - Tap "Log a crisis" to use the manual form, or tap the mic button and say something like "pain 7, lower back, from the cold" - watch it transcribe live, then pre-fill the slider/chips when you tap the mic again to stop. Tap "Export" next to the trend chart to generate and share a PDF (needs at least one logged entry).
+4. **Reminders** - Add one, confirm it appears in the list, delete it.
+5. **Reports** - Tap "Upload report," pick a photo, name it, confirm it appears in the list.
+6. **Emergency** - Add a contact first (SOS needs at least one). Tap SOS: it'll ask for Location permission, then open Messages pre-addressed with a maps link and your recent vitals. A Live Activity should appear on the Lock Screen/Dynamic Island at the same time - tap "Mark crisis as resolved" to end it.
+7. **Widget** - Long-press the Simulator's home screen > tap the `+` in the top corner > search "Sickle Shield" > add the small widget. It should show your pain score and water intake, updating the next time you open Explore.
+8. **Siri Shortcut** - With the Simulator, you can't easily test real Siri, but you can test the App Intent directly: open the Shortcuts app (should be preinstalled), create a new shortcut, search for "Log a pain crisis," add it, and run it.
+9. **HealthKit** - In the Simulator's **Health** app, manually add a Heart Rate or Blood Oxygen sample (Browse > search for it > Add Data Point), then reopen Sickle Shield's Explore tab and pull to refresh - the risk score's reasons should reflect it if the values are elevated/low enough to matter.
 
 ### Before this will actually run against your backend
 
@@ -107,4 +133,4 @@ All five tabs, wired to the real backend, with the exact visual language from th
 - `Hospital` directory browsing and creating appointments aren't wired yet (only reading your existing appointments, for the Explore card).
 - No profile-completion screen yet for the dob/gender/smoking/diagnosis fields collected in the original onboarding video - accounts work fully without it, but that data isn't collected in the current flow.
 
-This hasn't been compiled or run yet since it was written without access to a Mac/Xcode. Once you generate and open the project, there may be small build errors to fix (e.g. exact SwiftUI API availability) - flag them and I'll correct them immediately.
+This was written without access to a Mac/Xcode and is now being tested for the first time on real hardware - if the build itself throws errors (as opposed to the Run-button scheme issue above), send me the exact message from Xcode's Issue Navigator and I'll fix it right away.
