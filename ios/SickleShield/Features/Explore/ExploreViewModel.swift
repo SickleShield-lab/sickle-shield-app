@@ -10,6 +10,7 @@ final class ExploreViewModel: ObservableObject {
     @Published var errorMessage: String?
 
     private let locationManager = LocationManager()
+    private let healthKitManager = HealthKitManager()
 
     func load() async {
         isLoading = true
@@ -47,11 +48,21 @@ final class ExploreViewModel: ObservableObject {
             )
         }
 
+        let vitals = await healthKitManager.latestVitals()
+
         riskAssessment = RiskScoreEngine.assess(
             painRecords: history?.painRecords ?? [],
             averageRating: history?.averageRating ?? 0,
             waterIntake: water,
-            weather: weather
+            weather: weather,
+            vitals: vitals
         )
+
+        SharedStore.writeWidgetSnapshot(
+            painScore: Double(user?.painManager ?? 0),
+            water: water.map { "\($0.amount)/\($0.target)" } ?? "-/-",
+            updatedAt: Date()
+        )
+        WidgetReloader.reloadAll()
     }
 }

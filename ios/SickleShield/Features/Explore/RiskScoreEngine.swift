@@ -14,7 +14,8 @@ enum RiskScoreEngine {
         painRecords: [PainEntry],
         averageRating: Double,
         waterIntake: WaterIntakeStatus?,
-        weather: WeatherSnapshot?
+        weather: WeatherSnapshot?,
+        vitals: VitalsSnapshot? = nil
     ) -> CrisisRiskAssessment {
         var score = 0
         var reasons: [String] = []
@@ -50,6 +51,15 @@ enum RiskScoreEngine {
                 score += 8
                 reasons.append("dry conditions today")
             }
+        }
+
+        if let oxygen = vitals?.oxygenSaturationPercent, oxygen < 95 {
+            score += 15
+            reasons.append("blood oxygen reading below 95%")
+        }
+        if let heartRate = vitals?.heartRate, heartRate > 100 {
+            score += 10
+            reasons.append("resting heart rate higher than usual")
         }
 
         score = min(score, 100)

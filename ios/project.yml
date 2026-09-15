@@ -8,6 +8,13 @@ targets:
     deploymentTarget: "17.0"
     sources:
       - SickleShield
+      - path: Shared
+        group: Shared
+    dependencies:
+      - target: SickleShieldWidgets
+        embed: true
+    entitlements:
+      path: SickleShield/SickleShield.entitlements
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.sickleshield.app
@@ -24,4 +31,28 @@ targets:
         INFOPLIST_KEY_NSPhotoLibraryUsageDescription: "Sickle Shield needs access to your photos so you can upload medical reports."
         INFOPLIST_KEY_NSMicrophoneUsageDescription: "Sickle Shield uses the microphone to let you log a crisis by voice."
         INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: "Sickle Shield uses speech recognition to transcribe your voice when logging a crisis."
+        INFOPLIST_KEY_NSHealthShareUsageDescription: "Sickle Shield reads your heart rate and blood oxygen to factor them into your crisis risk score."
+        INFOPLIST_KEY_NSSupportsLiveActivities: YES
+        ENABLE_PREVIEWS: YES
+
+  SickleShieldWidgets:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - SickleShieldWidgets
+      - path: Shared
+        group: Shared
+    entitlements:
+      path: SickleShieldWidgets/SickleShieldWidgets.entitlements
+    info:
+      path: SickleShieldWidgets/Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.sickleshield.app.widgets
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1"
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SKIP_INSTALL: YES
         ENABLE_PREVIEWS: YES

@@ -7,6 +7,10 @@ Native SwiftUI, matching the neumorphic + liquid-glass design we settled on.
 ```
 ios/
   project.yml                  XcodeGen spec - generates the .xcodeproj (no manual pbxproj editing)
+  Shared/                      Files included in BOTH the app and widget extension targets
+    SharedStore.swift          App Group bridge (main app writes, widget reads)
+    CrisisActivityAttributes.swift   Live Activity data shape
+  SickleShieldWidgets/         Widget extension target: home screen widget + Live Activity UI
   SickleShield/
     SickleShieldApp.swift      App entry point
     RootTabView.swift          Bottom tab bar wiring the 5 screens
@@ -20,11 +24,12 @@ ios/
         PulsingSOSButton.swift
     Features/
       Auth/            LoginView, SignUpView, OTPVerificationView, AuthRootView
-      Explore/          + ExploreViewModel
+      Explore/          + ExploreViewModel, HealthKitManager, RiskScoreEngine
       Tracker/          + TrackerViewModel
       Reminders/        + RemindersViewModel, AddReminderSheet
       Reports/          + ReportsViewModel, NameReportSheet
-      Emergency/        + EmergencyViewModel, LocationManager, AddEmergencyContactSheet
+      Emergency/        + EmergencyViewModel, LocationManager, AddEmergencyContactSheet, WidgetReloader
+    Intents/            LogCrisisIntent.swift - Siri / Shortcuts support
     Networking/
       APIConfig.swift    Backend base URL - CHANGE THIS before running against a real deploy
       APIClient.swift    Generic request/upload methods, matches the backend's {success,message,data} envelope
@@ -50,8 +55,9 @@ ios/
    xcodegen generate
    ```
 5. Open `SickleShield.xcodeproj` in Xcode.
-6. In the project settings under **Signing & Capabilities**, set your own Apple Developer Team and adjust `PRODUCT_BUNDLE_IDENTIFIER` in `project.yml` if `com.sickleshield.app` isn't available to you, then re-run `xcodegen generate`.
-7. Pick an iPhone simulator and hit Run.
+6. In the project settings under **Signing & Capabilities**, set your own Apple Developer Team **for both the `SickleShield` and `SickleShieldWidgets` targets**, and adjust `PRODUCT_BUNDLE_IDENTIFIER` in `project.yml` if `com.sickleshield.app`/`com.sickleshield.app.widgets` aren't available to you, then re-run `xcodegen generate`.
+7. **This is the step most likely to need manual fixing**: Xcode needs to actually register the App Group. With the `SickleShield` target selected, go to Signing & Capabilities and confirm `group.com.sickleshield.app` shows under App Groups (it should already be listed from the entitlements file XcodeGen wrote) - if Xcode shows an error instead of a checkmark, click the group, let Xcode create/register it with your team, then repeat for the `SickleShieldWidgets` target so both point at the exact same group ID. Multi-target + App Group + widget extension wiring is the one part of this project I could not verify at all without Xcode itself, so treat this step as the most likely place for something to need a manual nudge.
+8. Pick an iPhone simulator and hit Run. To see the widget, long-press the simulator's home screen and add it; the Live Activity appears automatically the next time you trigger SOS.
 
 Whenever `project.yml` changes (new files usually don't need this - XcodeGen picks up anything under `SickleShield/` automatically - but target settings, new frameworks, etc. do), re-run `xcodegen generate`.
 
@@ -72,11 +78,21 @@ All five tabs, wired to the real backend, with the exact visual language from th
 - **Voice crisis logging** (Tracker tab): tap the mic, say something like "pain 7, lower back, from the cold," and it pre-fills the severity slider, trigger chips, and location from the transcript (`VoiceLogger.swift` + `VoiceCrisisParser`) using on-device Speech framework recognition. Keyword extraction, not real NLU - good enough to save typing mid-crisis, not a general assistant.
 - **Doctor-ready PDF export** (Tracker tab, "Export" next to the trend chart): generates a one-page PDF with patient info, the trend chart, and a full entries table, then opens the share sheet (`PainReportExporter.swift`, pure PDFKit/Core Graphics, no dependency).
 
-### Deliberately not attempted in this pass
+### Phase 2 - Apple-native platform features
 
-- **True offline-first** (local persistence + sync queue) - flagged as needing its own dedicated architecture pass rather than being bolted on alongside four other features; would touch every screen already built.
-- **Apple Watch companion, HealthKit, Live Activities/widgets, Apple Wallet passes** - all gated on an active (paid) Apple Developer Program membership for real device testing and any App Store submission. Free accounts already cover everything above.
-- **Blood donor matching and peer support community** - these are product-safety/moderation design problems (liability, verifying claims, content moderation) more than engineering ones; deliberately not started until that design conversation happens.
+- **Siri / Shortcuts** (`Intents/LogCrisisIntent.swift`): "Log a pain crisis in Sickle Shield" logs a real pain entry via Siri without opening the app. Works on a free Apple ID.
+- **HealthKit** (`HealthKitManager.swift`): reads latest heart rate and blood oxygen (read-only, never writes), feeding into the risk score - elevated heart rate or low SpO2 now raise the score. Needs the HealthKit capability (already in the entitlements file) - works on a free account for local testing.
+- **Home Screen widget** (`SickleShieldWidgets/PainWidget.swift`): shows pain score and water intake without opening the app. Updates whenever the app fetches fresh data (via an App Group + `WidgetCenter.reloadAllTimelines()`), plus a once-an-hour timeline refresh as a safety net.
+- **Live Activity** (`SickleShieldWidgets/CrisisLiveActivity.swift`): starts automatically when SOS fires, showing severity and who was alerted on the Lock Screen and Dynamic Island. Ends via "Mark crisis as resolved" on the Emergency tab.
+
+**This is the part of the whole project I'd flag as highest-risk without a Mac to test on.** Adding a widget extension target by hand-editing a YAML spec (rather than through Xcode's own "New Target" wizard, which handles a lot of this invisibly) is the trickiest Xcode configuration in this codebase - multi-target builds, an App Group shared between two bundle IDs, and a Live Activity's data type needing to live in both targets at once. I validated every YAML/plist file for syntactic correctness (no macOS needed for that), but semantic correctness inside Xcode itself is unverified. See step 7 in setup above.
+
+### Deliberately not attempted
+
+- **True offline-first** (local persistence + sync queue) - needs its own dedicated architecture pass; would touch every screen already built.
+- **Apple Watch companion app** - a full separate watchOS target with its own UI and WatchConnectivity plumbing; big enough to deserve its own pass rather than being squeezed in alongside the widget/Live Activity work.
+- **Apple Wallet pass** - hard-blocked, not just harder to test: generating a `.pkpass` requires a Pass Type ID certificate that only exists once you're enrolled in the paid Apple Developer Program. Nothing to build yet.
+- **Blood donor matching and peer support community** - product-safety/moderation design problems (liability, verifying claims, content moderation) more than engineering ones; deliberately not started until that design conversation happens.
 - **Telehealth video** - needs picking and paying for a vendor (Twilio/Agora/Daily.co); not started pending that decision.
 
 ### Before this will actually run against your backend

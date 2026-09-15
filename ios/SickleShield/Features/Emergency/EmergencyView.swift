@@ -29,6 +29,17 @@ struct EmergencyView: View {
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 20)
 
+                    if viewModel.isCrisisActive {
+                        Button {
+                            viewModel.endCrisis()
+                        } label: {
+                            Text("Mark crisis as resolved")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundStyle(Theme.deepRed)
+                        }
+                        .buttonStyle(.plain)
+                    }
+
                     if let errorMessage = viewModel.errorMessage, viewModel.contacts.isEmpty {
                         ErrorState(message: errorMessage) {
                             Task { await viewModel.load() }

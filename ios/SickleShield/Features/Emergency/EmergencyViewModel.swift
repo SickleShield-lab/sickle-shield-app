@@ -8,6 +8,7 @@ final class EmergencyViewModel: ObservableObject {
     @Published var sosStatus = "Tap to share your live location by text"
     @Published var isSendingSOS = false
     @Published var pendingSOSURL: URL?
+    @Published var isCrisisActive = false
 
     private let locationManager = LocationManager()
 
@@ -61,9 +62,21 @@ final class EmergencyViewModel: ObservableObject {
             }
             pendingSOSURL = url
             sosStatus = "Opening Messages with your location and recent vitals..."
+
+            if #available(iOS 16.1, *) {
+                let recentSeverity = (try? await PainAPI.history(days: 1))?.painRecords.last?.rating ?? 5
+                CrisisLiveActivityController.start(severity: recentSeverity, contactName: contacts.first?.contactName ?? "your contacts")
+                isCrisisActive = true
+            }
         } catch {
             sosStatus = error.localizedDescription
         }
+    }
+
+    func endCrisis() {
+        guard #available(iOS 16.1, *) else { return }
+        CrisisLiveActivityController.endAll()
+        isCrisisActive = false
     }
 
     /// Best-effort summary of the last 24h of pain logs and today's water
