@@ -1,0 +1,10 @@
+node_modules
+dist
+.vercel
+migrations
+.env
+.env.*
+!.env.example
+src/config/*firebase-adminsdk*.json
+*.pem
+*.key

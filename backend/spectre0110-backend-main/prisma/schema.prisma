@@ -1,0 +1,263 @@
+datasource db {
+  provider = "postgres"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String        @id @default(uuid())
+  username     String
+  email        String        @unique
+  password     String
+  fcmToken     String?
+  profileImage String?
+  lang         String?
+  dob          String?
+  gender       String?
+  smoking      Boolean?
+  diagnosis    String?
+  weight       String?
+  bloodGroup   String?
+  painManager  Int           @default(0)
+  waterIntake  Int           @default(10)
+  mobileNumber String?
+  role         UserRole      @default(USER)
+  status       UserStatus    @default(ACTIVE)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  appointment  Appointment[]
+  medication   Medication[]
+  symptoms     Symptoms[]
+  pain         Pain[]
+  weightGoal   WeightGoal[]
+  waterIntakes WaterIntake[]
+
+  @@map("users")
+}
+
+model PendingUser {
+  id       String @id @default(uuid())
+  username String
+  email    String @unique
+  password String
+  fcmToken String
+
+  @@map("pending_users")
+}
+
+model Otp {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  otpCode   String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("otps")
+}
+
+model EduResource {
+  id             String   @id @default(uuid())
+  resourceImages String[]
+  title          String
+  subTitle       String
+  description    String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("edu_resources")
+}
+
+model Hospital {
+  id                String        @id @default(uuid())
+  hospitalName      String
+  userId            String
+  location          String
+  hospitalImages    String        @default("https://nyc3.digitaloceanspaces.com/smtech-space/uploads/venues/photos/1756526557402-a09vvst3os.png")
+  emergencyContacts String[]
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  appointment       Appointment[]
+
+  @@map("hospitals")
+}
+
+model Appointment {
+  id         String            @id @default(uuid())
+  userId     String
+  hospitalId String
+  doctorName String?
+  date       DateTime
+  shift      String
+  time       String
+  status     AppointmentStatus @default(PENDING)
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+  user       User              @relation(fields: [userId], references: [id])
+  hospital   Hospital          @relation(fields: [hospitalId], references: [id])
+
+  @@map("appointments")
+}
+
+model Medication {
+  id          String   @id @default(uuid())
+  userId      String
+  day         Days
+  title       String
+  description String
+  reminder    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@map("medications")
+}
+
+model Symptoms {
+  id          String   @id @default(uuid())
+  userId      String
+  day         Days
+  title       String
+  description String
+  date        DateTime
+  time        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@map("symptoms")
+}
+
+model Pain {
+  id        String   @id @default(uuid())
+  userId    String
+  pain      String
+  sensation String
+  frequency String
+  rating    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("pains")
+}
+
+model WeightGoal {
+  id           String     @id @default(uuid())
+  userId       String
+  targetType   TargetType @default(week)
+  startWeight  Int
+  targetWeight Int
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  user         User       @relation(fields: [userId], references: [id])
+
+  @@map("weight_goals")
+}
+
+model WaterIntake {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  amount    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("water_intakes")
+}
+
+model Report {
+  id         String   @id @default(uuid())
+  userId     String
+  reportName String
+  date       DateTime
+  reportFile String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("reports")
+}
+
+model Reminder {
+  id           String   @id @default(uuid())
+  userId       String
+  medicineName String
+  medicineType String
+  amount       String
+  reminderTime String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("reminders")
+}
+
+model EmergencyContact {
+  id            String   @id @default(uuid())
+  userId        String
+  contactName   String
+  contactNumber String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("emergency_contacts")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  body      String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("notifications")
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  DELETED
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum Days {
+  Mon
+  Tue
+  Wed
+  Thu
+  Fri
+  Sat
+  Sun
+}
+
+enum TargetType {
+  week
+  month
+  year
+}
+
+enum EatingTime {
+  Breakfast
+  Lunch
+  Dinner
+}
+
+enum EatingAt {
+  Before
+  After
+}

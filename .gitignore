@@ -1,0 +1,10 @@
+# OS / editor junk
+.DS_Store
+Thumbs.db
+
+# Xcode - project.yml is the source of truth (XcodeGen); the .xcodeproj is
+# generated and shouldn't be committed to avoid pbxproj merge conflicts.
+ios/*.xcodeproj/
+ios/**/xcuserdata/
+ios/DerivedData/
+ios/.build/
