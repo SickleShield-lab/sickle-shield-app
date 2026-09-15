@@ -20,6 +20,8 @@ targets:
         INFOPLIST_KEY_CFBundleDisplayName: "Sickle Shield"
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
-        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "Sickle Shield uses your location to share it with your emergency contacts when you trigger SOS."
+        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "Sickle Shield uses your location to share it with your emergency contacts when you trigger SOS, and to check local weather as part of your crisis risk score."
         INFOPLIST_KEY_NSPhotoLibraryUsageDescription: "Sickle Shield needs access to your photos so you can upload medical reports."
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: "Sickle Shield uses the microphone to let you log a crisis by voice."
+        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: "Sickle Shield uses speech recognition to transcribe your voice when logging a crisis."
         ENABLE_PREVIEWS: YES

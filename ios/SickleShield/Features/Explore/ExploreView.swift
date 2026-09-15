@@ -60,6 +60,10 @@ struct ExploreView: View {
                         .padding(.bottom, -24)
                         .redacted(reason: viewModel.isLoading && viewModel.user == nil ? .placeholder : [])
 
+                        if let risk = viewModel.riskAssessment {
+                            RiskScoreCard(assessment: risk)
+                        }
+
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Services")
                                 .font(.system(size: 12, weight: .medium))
@@ -161,6 +165,48 @@ struct ExploreView: View {
     private var weightDisplay: String {
         guard let weight = (viewModel.user ?? session.currentUser)?.weight, !weight.isEmpty else { return "—" }
         return "\(weight)kg"
+    }
+}
+
+private struct RiskScoreCard: View {
+    let assessment: CrisisRiskAssessment
+
+    private var levelColor: Color {
+        switch assessment.level {
+        case "Low": return Color(hex: "1D9E75")
+        case "Moderate": return Color(hex: "E0A100")
+        case "Elevated": return Theme.accent
+        default: return Theme.deepRed
+        }
+    }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .stroke(Theme.background, lineWidth: 6)
+                Circle()
+                    .trim(from: 0, to: CGFloat(assessment.score) / 100)
+                    .stroke(levelColor, style: StrokeStyle(lineWidth: 6, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                Text("\(assessment.score)")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(Theme.ink)
+            }
+            .frame(width: 48, height: 48)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("\(assessment.level) crisis risk today")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(Theme.ink)
+                Text(assessment.explanation)
+                    .font(.system(size: 10))
+                    .foregroundStyle(Theme.muted)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(14)
+        .neumorphicCard()
     }
 }
 
