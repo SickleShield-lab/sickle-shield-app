@@ -1,11 +1,24 @@
 import nodemailer from "nodemailer";
 import config from "../config";
+const isSmtpConfigured = () =>
+  !!config.emailSender.email &&
+  !!config.emailSender.app_pass &&
+  config.emailSender.email !== "support@example.com" &&
+  config.emailSender.app_pass !== "app-specific-password";
+
 const sendEmail = async (
   to: string,
   subject: string,
   html: string,
   text?: string
 ) => {
+  if (!isSmtpConfigured()) {
+    console.log(
+      `\n[sendEmail] SMTP not configured — logging email instead of sending it.\nTo: ${to}\nSubject: ${subject}\n${text ?? html}\n`
+    );
+    return;
+  }
+
   // Create a transporter
   const transporter = nodemailer.createTransport({
     host: "mail.privateemail.com", // for Namecheap PrivateEmail
