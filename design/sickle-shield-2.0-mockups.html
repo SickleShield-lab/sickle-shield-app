@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sickle Shield 2.0 — Design Mockups</title>
+<style>
+  :root {
+    --bg-light: #F5F3F1;
+    --surface-light: #FFFFFF;
+    --surface-2-light: #F0EDEA;
+    --text-primary-light: #1C1A1B;
+    --text-secondary-light: #6B6870;
+    --text-muted-light: #9C98A0;
+    --border-light: #E8E4E0;
+
+    --bg-dark: #131114;
+    --surface-dark: #1E1B1E;
+    --surface-2-dark: #262227;
+    --text-primary-dark: #F2EFED;
+    --text-secondary-dark: #ACA7AD;
+    --text-muted-dark: #7C777E;
+    --border-dark: #322D32;
+
+    --brand: #8C0F26;
+    --brand-soft: #F6E4E6;
+    --brand-soft-dark: #3A1A20;
+    --accent-warm: #D3573F;
+    --success: #1F9D63;
+    --warning: #B8860B;
+    --info: #2F6FE0;
+
+    --radius-lg: 22px;
+    --radius-md: 16px;
+    --radius-sm: 10px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 48px 32px 96px;
+    background: #EDEAE6;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    color: #1C1A1B;
+  }
+
+  /* --- Icon system: stroke-based line icons, sized off the parent font-size --- */
+  svg.i {
+    display: inline-block;
+    width: 1em; height: 1em;
+    vertical-align: -0.15em;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .page-header {
+    max-width: 1400px;
+    margin: 0 auto 40px;
+  }
+  .page-header h1 { font-size: 28px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.02em; }
+  .page-header p { font-size: 15px; color: #6B6870; margin: 0; max-width: 640px; line-height: 1.5; }
+
+  .grid {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 48px 32px;
+    justify-items: center;
+  }
+
+  .mock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  .mock .caption { font-size: 13px; font-weight: 600; color: #4A4750; text-transform: uppercase; letter-spacing: 0.06em; }
+  .mock .subcaption { font-size: 12px; color: #9C98A0; margin-top: -8px; text-align: center; max-width: 280px; }
+
+  /* --- Phone frame --- */
+  .phone {
+    width: 300px;
+    height: 640px;
+    border-radius: 46px;
+    background: #0B0A0C;
+    padding: 10px;
+    box-shadow: 0 24px 48px rgba(0,0,0,0.22), 0 4px 12px rgba(0,0,0,0.12);
+  }
+  .screen {
+    width: 100%;
+    height: 100%;
+    border-radius: 38px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    font-family: inherit;
+  }
+  .screen.light { background: var(--bg-light); color: var(--text-primary-light); }
+  .screen.dark  { background: var(--bg-dark);  color: var(--text-primary-dark); }
+
+  .dynamic-island {
+    position: absolute;
+    top: 10px; left: 50%; transform: translateX(-50%);
+    width: 90px; height: 24px; background: #000; border-radius: 14px; z-index: 20;
+  }
+  .status-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 22px 4px; font-size: 13px; font-weight: 600;
+  }
+  .status-icons { display: flex; align-items: center; gap: 5px; font-size: 13px; }
+  .status-icons svg.i { width: 1.3em; height: 1.3em; }
+
+  .content { flex: 1; overflow: hidden; padding: 6px 18px 0; display: flex; flex-direction: column; gap: 16px; }
+
+  /* --- Header --- */
+  .greeting-row { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 4px; }
+  .greeting h2 { font-size: 22px; font-weight: 700; margin: 0 0 2px; letter-spacing: -0.02em; }
+  .greeting p { font-size: 12.5px; margin: 0; }
+  .light .greeting p { color: var(--text-secondary-light); }
+  .dark .greeting p { color: var(--text-secondary-dark); }
+  .header-icons { display: flex; gap: 8px; }
+  .icon-btn {
+    width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 15px;
+  }
+  .light .icon-btn { background: var(--surface-light); box-shadow: 0 1px 3px rgba(0,0,0,0.08); color: var(--text-primary-light); }
+  .dark .icon-btn { background: var(--surface-dark); color: var(--text-primary-dark); }
+
+  /* --- Stat row --- */
+  .stat-row { display: flex; gap: 10px; overflow-x: hidden; }
+  .stat-card {
+    flex: 1; border-radius: var(--radius-md); padding: 12px 12px 11px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .light .stat-card { background: var(--surface-light); box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+  .dark .stat-card { background: var(--surface-dark); }
+  .stat-card .icon { font-size: 16px; margin-bottom: 2px; }
+  .light .stat-card .icon { color: var(--text-secondary-light); }
+  .dark .stat-card .icon { color: var(--text-secondary-dark); }
+  .stat-card.pain .icon { color: var(--brand); }
+  .stat-card .value { font-size: 19px; font-weight: 700; letter-spacing: -0.02em; }
+  .stat-card .label { font-size: 10.5px; }
+  .stat-card .sub { font-size: 9.5px; }
+  .light .stat-card .label { color: var(--text-primary-light); }
+  .dark .stat-card .label { color: var(--text-primary-dark); }
+  .light .stat-card .sub { color: var(--text-muted-light); }
+  .dark .stat-card .sub { color: var(--text-muted-dark); }
+  .stat-card.pain .value { color: var(--brand); }
+
+  /* --- Quick log row --- */
+  .section-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em;
+  }
+  .light .section-label { color: var(--text-muted-light); }
+  .dark .section-label { color: var(--text-muted-dark); }
+
+  .quicklog-row { display: flex; gap: 10px; }
+  .quicklog-pill {
+    flex: 1; border-radius: 16px; padding: 12px 4px; text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+  }
+  .light .quicklog-pill { background: var(--surface-light); box-shadow: 0 1px 4px rgba(0,0,0,0.05); color: var(--brand); }
+  .dark .quicklog-pill { background: var(--surface-dark); color: #E39AA4; }
+  .quicklog-pill .qicon { font-size: 18px; }
+  .quicklog-pill .qlabel { font-size: 9.5px; font-weight: 600; }
+  .light .quicklog-pill .qlabel { color: var(--text-primary-light); }
+  .dark .quicklog-pill .qlabel { color: var(--text-primary-dark); }
+
+  /* --- Timeline --- */
+  .timeline { display: flex; flex-direction: column; gap: 0; }
+  .timeline-item { display: flex; gap: 12px; position: relative; padding-bottom: 14px; }
+  .timeline-item:last-child { padding-bottom: 0; }
+  .timeline-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--brand); margin-top: 5px; flex-shrink: 0; position: relative;
+  }
+  .timeline-item:not(:last-child) .timeline-dot::after {
+    content: ""; position: absolute; top: 10px; left: 3px; width: 2px; height: 28px;
+  }
+  .light .timeline-item:not(:last-child) .timeline-dot::after { background: var(--border-light); }
+  .dark .timeline-item:not(:last-child) .timeline-dot::after { background: var(--border-dark); }
+  .timeline-text .t-time { font-size: 10px; font-weight: 600; }
+  .timeline-text .t-desc { font-size: 12.5px; }
+  .light .timeline-text .t-time { color: var(--text-muted-light); }
+  .dark .timeline-text .t-time { color: var(--text-muted-dark); }
+
+  /* --- Insight card --- */
+  .insight-card {
+    border-radius: var(--radius-md); padding: 14px 16px; display: flex; flex-direction: column; gap: 6px;
+  }
+  .light .insight-card { background: var(--brand-soft); }
+  .dark .insight-card { background: var(--brand-soft-dark); }
+  .insight-card .quote { font-size: 13px; font-style: italic; line-height: 1.4; }
+  .insight-card .link { font-size: 11.5px; font-weight: 700; color: var(--brand); }
+
+  /* --- Upcoming card --- */
+  .upcoming-card {
+    border-radius: var(--radius-md); padding: 12px 14px; display: flex; align-items: center; gap: 12px;
+  }
+  .light .upcoming-card { background: var(--surface-light); box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+  .dark .upcoming-card { background: var(--surface-dark); }
+  .upcoming-card .ic { font-size: 19px; }
+  .light .upcoming-card .ic { color: var(--info); }
+  .dark .upcoming-card .ic { color: #7FA8F0; }
+  .upcoming-card .title { font-size: 13px; font-weight: 600; }
+  .upcoming-card .meta { font-size: 11px; }
+  .light .upcoming-card .meta { color: var(--text-secondary-light); }
+  .dark .upcoming-card .meta { color: var(--text-secondary-dark); }
+
+  /* --- Tab bar --- */
+  .tabbar {
+    display: flex; justify-content: space-around; padding: 10px 0 22px; margin-top: auto;
+    border-top: 1px solid;
+  }
+  .light .tabbar { border-color: var(--border-light); background: rgba(255,255,255,0.85); }
+  .dark .tabbar { border-color: var(--border-dark); background: rgba(30,27,30,0.85); }
+  .tab { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 9.5px; font-weight: 600; }
+  .tab .ticon { font-size: 18px; }
+  .tab.active { color: var(--brand); }
+  .light .tab:not(.active) { color: var(--text-muted-light); }
+  .dark .tab:not(.active) { color: var(--text-muted-dark); }
+
+  /* --- Sheet (Quick Log) --- */
+  .sheet-handle { width: 36px; height: 4px; border-radius: 2px; background: #C9C5C0; margin: 8px auto 0; }
+  .sheet-title { font-size: 18px; font-weight: 700; text-align: center; margin: 6px 0 2px; }
+  .action-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .action-tile {
+    border-radius: 16px; padding: 14px 6px; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .action-tile .ai { font-size: 21px; }
+  .action-tile .al { font-size: 10px; font-weight: 700; }
+  .tile-pain   { background: #F6E4E6; } .tile-pain .al,   .tile-pain .ai   { color: #8C0F26; }
+  .tile-med    { background: #E4EEF6; } .tile-med .al,    .tile-med .ai    { color: #2F6FE0; }
+  .tile-water  { background: #E2F1F6; } .tile-water .al,  .tile-water .ai  { color: #1D7FA6; }
+  .tile-symp   { background: #F3E9F6; } .tile-symp .al,   .tile-symp .ai   { color: #7A3FA6; }
+  .tile-weight { background: #EFF0E4; } .tile-weight .al, .tile-weight .ai { color: #6F7A2E; }
+  .tile-mood   { background: #F6EEE2; } .tile-mood .al,   .tile-mood .ai   { color: #A6641D; }
+
+  .step-card { border-radius: var(--radius-lg); background: var(--surface-light); padding: 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+  .step-title { font-size: 14px; font-weight: 700; }
+  .pain-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+  .pain-num {
+    aspect-ratio: 1; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; background: #F0EDEA; color: #6B6870;
+  }
+  .pain-num.selected { background: var(--brand); color: #fff; }
+  .save-btn {
+    margin-top: auto; background: var(--brand); color: #fff; text-align: center; font-weight: 700; font-size: 14px;
+    padding: 13px; border-radius: 14px;
+  }
+
+  /* --- Pain screen --- */
+  .segment { display: flex; background: var(--surface-2-light); border-radius: 12px; padding: 3px; }
+  .segment span { flex: 1; text-align: center; font-size: 10.5px; font-weight: 600; padding: 6px 0; border-radius: 9px; color: var(--text-secondary-light); }
+  .segment span.sel { background: #fff; color: var(--text-primary-light); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .stat-inline-row { display: flex; justify-content: space-between; }
+  .stat-inline { text-align: center; flex: 1; }
+  .stat-inline .v { font-size: 16px; font-weight: 700; }
+  .stat-inline .l { font-size: 9px; color: var(--text-muted-light); text-transform: uppercase; letter-spacing: 0.04em; }
+  .chart-card { background: var(--surface-light); border-radius: var(--radius-md); padding: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+  .chart-caption { font-size: 11px; color: var(--text-secondary-light); line-height: 1.5; margin-top: 8px; }
+  .episode-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border-light); }
+  .episode-row:last-child { border-bottom: none; }
+  .ep-badge { width: 30px; height: 30px; border-radius: 50%; background: var(--brand-soft); color: var(--brand); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+  .ep-text .ep-title { font-size: 12.5px; font-weight: 600; }
+  .ep-text .ep-meta { font-size: 10.5px; color: var(--text-muted-light); }
+
+  /* --- Crisis / Emergency --- */
+  .screen.crisis { background: #17080B; color: #F5EDEE; }
+  .crisis-content { flex: 1; padding: 26px 22px 20px; display: flex; flex-direction: column; gap: 18px; }
+  .crisis-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #C98A94; text-align: center; }
+  .crisis-number { font-size: 68px; font-weight: 800; text-align: center; line-height: 1; color: #FF6B6B; }
+  .crisis-sub { font-size: 15px; text-align: center; color: #E7D6D8; }
+  .crisis-meta-row { display: flex; justify-content: center; gap: 28px; }
+  .crisis-meta { text-align: center; }
+  .crisis-meta .v { font-size: 14px; font-weight: 700; }
+  .crisis-meta .l { font-size: 9.5px; color: #9C7B80; text-transform: uppercase; }
+  .crisis-row {
+    display: flex; justify-content: space-between; align-items: center; padding: 14px 16px;
+    background: #241014; border-radius: 14px; font-size: 13px; font-weight: 600;
+  }
+  .crisis-row .chev { color: #9C7B80; font-size: 15px; }
+  .crisis-call-btn {
+    margin-top: auto; background: #E2352F; color: #fff; text-align: center; font-weight: 700; font-size: 15px;
+    padding: 15px; border-radius: 16px; display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+
+  /* --- Settings --- */
+  .profile-row { display: flex; align-items: center; gap: 12px; padding: 4px 0 6px; }
+  .avatar { width: 46px; height: 46px; border-radius: 50%; background: var(--brand-soft); color: var(--brand); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; }
+  .profile-name { font-size: 14.5px; font-weight: 700; }
+  .profile-email { font-size: 11px; color: var(--text-secondary-light); }
+  .settings-group { background: var(--surface-light); border-radius: var(--radius-md); overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+  .settings-row { display: flex; align-items: center; gap: 11px; padding: 11px 14px; border-bottom: 1px solid var(--border-light); font-size: 13px; }
+  .settings-row:last-child { border-bottom: none; }
+  .settings-row .sicon { font-size: 15px; width: 20px; text-align: center; color: var(--brand); flex-shrink: 0; }
+  .settings-row .slabel { flex: 1; }
+  .settings-row .schev { color: var(--text-muted-light); font-size: 12px; }
+
+  /* --- Insights --- */
+  .baseline-card { background: var(--surface-light); border-radius: var(--radius-md); padding: 14px 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+  .baseline-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted-light); margin-bottom: 10px; }
+  .baseline-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .baseline-item .bv { font-size: 15px; font-weight: 700; }
+  .baseline-item .bl { font-size: 10px; color: var(--text-secondary-light); }
+  .insight-list-card {
+    background: var(--surface-light); border-radius: var(--radius-md); padding: 13px 14px;
+    display: flex; gap: 10px; align-items: flex-start; box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  .insight-list-card .iic { font-size: 16px; margin-top: 1px; color: var(--text-secondary-light); flex-shrink: 0; }
+  .insight-list-card .iitext { font-size: 12px; line-height: 1.4; }
+  .tag { display: inline-block; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 7px; border-radius: 6px; margin-top: 5px; }
+  .tag.pattern { background: #E4EEF6; color: #2F6FE0; }
+  .tag.data { background: #EFF0E4; color: #6F7A2E; }
+</style>
+</head>
+<body>
+
+<!-- Shared icon sprite: simple stroke-based line icons, not emoji -->
+<svg style="display:none" aria-hidden="true">
+  <defs>
+    <symbol id="icon-bell" viewBox="0 0 24 24">
+      <path d="M12 4a5 5 0 0 0-5 5v2.6c0 1.1-.4 2.1-1.1 2.9L5 15.5h14l-.9-1c-.7-.8-1.1-1.8-1.1-2.9V9a5 5 0 0 0-5-5Z"/>
+      <path d="M9.5 18a2.5 2.5 0 0 0 5 0"/>
+    </symbol>
+    <symbol id="icon-person" viewBox="0 0 24 24">
+      <circle cx="12" cy="8" r="3.4"/>
+      <path d="M5.5 19.5c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6"/>
+    </symbol>
+    <symbol id="icon-pulse" viewBox="0 0 24 24">
+      <path d="M2.5 13h3.2l1.6-4.5 3 9 2.4-7 1.6 2.5H21.5"/>
+    </symbol>
+    <symbol id="icon-drop" viewBox="0 0 24 24">
+      <path d="M12 3.5c3.6 4.3 5.5 7.3 5.5 10a5.5 5.5 0 1 1-11 0c0-2.7 1.9-5.7 5.5-10Z"/>
+    </symbol>
+    <symbol id="icon-pill" viewBox="0 0 24 24">
+      <g transform="rotate(-40 12 12)">
+        <rect x="4" y="9" width="16" height="6" rx="3"/>
+        <line x1="12" y1="9" x2="12" y2="15"/>
+      </g>
+    </symbol>
+    <symbol id="icon-thermometer" viewBox="0 0 24 24">
+      <rect x="10.6" y="3.2" width="2.8" height="11.5" rx="1.4"/>
+      <circle cx="12" cy="17.5" r="3.1"/>
+    </symbol>
+    <symbol id="icon-scale" viewBox="0 0 24 24">
+      <rect x="4" y="14" width="16" height="6" rx="2"/>
+      <path d="M8 14l1.5-6h5L16 14"/>
+      <circle cx="12" cy="17" r="1.1" fill="currentColor" stroke="none"/>
+    </symbol>
+    <symbol id="icon-face" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="8.5"/>
+      <circle cx="9" cy="10.3" r="0.9" fill="currentColor" stroke="none"/>
+      <circle cx="15" cy="10.3" r="0.9" fill="currentColor" stroke="none"/>
+      <path d="M8.5 14.3c1 1.3 2.4 2 3.5 2s2.5-.7 3.5-2"/>
+    </symbol>
+    <symbol id="icon-calendar" viewBox="0 0 24 24">
+      <rect x="4" y="5.5" width="16" height="15" rx="3"/>
+      <line x1="4" y1="10" x2="20" y2="10"/>
+      <line x1="8" y1="3.5" x2="8" y2="7"/>
+      <line x1="16" y1="3.5" x2="16" y2="7"/>
+      <circle cx="12" cy="14.5" r="1.2" fill="currentColor" stroke="none"/>
+    </symbol>
+    <symbol id="icon-home" viewBox="0 0 24 24">
+      <path d="M4 11.5 12 4l8 7.5"/>
+      <path d="M6 10.5V20h12v-9.5"/>
+    </symbol>
+    <symbol id="icon-chart" viewBox="0 0 24 24">
+      <line x1="6" y1="19" x2="6" y2="13"/>
+      <line x1="12" y1="19" x2="12" y2="8"/>
+      <line x1="18" y1="19" x2="18" y2="11"/>
+      <line x1="3.5" y1="20.5" x2="20.5" y2="20.5"/>
+    </symbol>
+    <symbol id="icon-folder" viewBox="0 0 24 24">
+      <path d="M3.5 7.5a1.5 1.5 0 0 1 1.5-1.5h4l2 2.2h8a1.5 1.5 0 0 1 1.5 1.5v8.3a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5Z"/>
+    </symbol>
+    <symbol id="icon-alert" viewBox="0 0 24 24">
+      <path d="M12 4 3 19.5h18Z"/>
+      <line x1="12" y1="10" x2="12" y2="14.5"/>
+      <circle cx="12" cy="17" r="0.9" fill="currentColor" stroke="none"/>
+    </symbol>
+    <symbol id="icon-heart" viewBox="0 0 24 24">
+      <path d="M12 19.5s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 6.8 4.3 4.3 0 0 1 19.5 9.5c0 5.4-7.5 10-7.5 10Z"/>
+    </symbol>
+    <symbol id="icon-lock" viewBox="0 0 24 24">
+      <rect x="5.5" y="10.5" width="13" height="9.5" rx="2.2"/>
+      <path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/>
+      <circle cx="12" cy="15" r="1.1" fill="currentColor" stroke="none"/>
+    </symbol>
+    <symbol id="icon-box" viewBox="0 0 24 24">
+      <path d="M4 8.5 12 4l8 4.5v8L12 21l-8-4.5Z"/>
+      <path d="M4 8.5 12 13l8-4.5"/>
+      <line x1="12" y1="13" x2="12" y2="21"/>
+    </symbol>
+    <symbol id="icon-chat" viewBox="0 0 24 24">
+      <path d="M4.5 6.5h15a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H10l-4 3v-3H4.5A1.5 1.5 0 0 1 3 15V8a1.5 1.5 0 0 1 1.5-1.5Z"/>
+    </symbol>
+    <symbol id="icon-info" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="8.5"/>
+      <line x1="12" y1="11" x2="12" y2="16"/>
+      <circle cx="12" cy="7.8" r="0.9" fill="currentColor" stroke="none"/>
+    </symbol>
+    <symbol id="icon-appearance" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="8.5"/>
+      <path d="M12 3.5a8.5 8.5 0 0 0 0 17Z" fill="currentColor" stroke="none"/>
+    </symbol>
+    <symbol id="icon-accessibility" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="8.5"/>
+      <circle cx="12" cy="8" r="1.1" fill="currentColor" stroke="none"/>
+      <path d="M8 10.5h8M12 10.5V16M9.5 19l2.5-4.5 2.5 4.5"/>
+    </symbol>
+    <symbol id="icon-phone" viewBox="0 0 24 24">
+      <path d="M6 4.5h3l1.3 4-2 1.6a11 11 0 0 0 5.6 5.6l1.6-2 4 1.3v3a1.5 1.5 0 0 1-1.6 1.5A14.5 14.5 0 0 1 4.5 6.1 1.5 1.5 0 0 1 6 4.5Z"/>
+    </symbol>
+    <symbol id="icon-trend-down" viewBox="0 0 24 24">
+      <polyline points="4,7 10,13 14,10 20,17"/>
+      <polyline points="15,17 20,17 20,12"/>
+    </symbol>
+    <symbol id="icon-signal" viewBox="0 0 24 24">
+      <rect x="2.5" y="14" width="3" height="6" rx="0.6" fill="currentColor" stroke="none"/>
+      <rect x="7.5" y="11" width="3" height="9" rx="0.6" fill="currentColor" stroke="none"/>
+      <rect x="12.5" y="7" width="3" height="13" rx="0.6" fill="currentColor" stroke="none"/>
+      <rect x="17.5" y="3.5" width="3" height="16.5" rx="0.6" fill="currentColor" stroke="none"/>
+    </symbol>
+    <symbol id="icon-battery" viewBox="0 0 24 24">
+      <rect x="2" y="8" width="18" height="8.5" rx="2" />
+      <rect x="4" y="9.5" width="14" height="5.5" rx="1" fill="currentColor" stroke="none"/>
+      <rect x="20.5" y="10.5" width="1.8" height="3.5" rx="0.7" fill="currentColor" stroke="none"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="page-header">
+  <h1>Sickle Shield 2.0 — Design Direction</h1>
+  <p>Static HTML/CSS mockups only — not connected to the real app. Icons are hand-drawn stroke-based line icons (matching how the real app uses SF Symbols), not emoji. Brand red (#8C0F26) is reserved for pain data, emergency actions, and selected states; everything else sits on neutral surfaces. Seven key screens shown below, light and dark.</p>
+</div>
+
+<div class="grid">
+
+  <!-- 1. TODAY - LIGHT -->
+  <div class="mock">
+    <div class="phone">
+      <div class="screen light">
+        <div class="dynamic-island"></div>
+        <div class="status-bar"><span>9:41</span><span class="status-icons"><svg class="i" viewBox="0 0 24 24"><use href="#icon-signal"/></svg><svg class="i" viewBox="0 0 24 24"><use href="#icon-battery"/></svg></span></div>
+        <div class="content">
+          <div class="greeting-row">
+            <div class="greeting">
+              <h2>Good morning, Hamza</h2>
+              <p>Here's your health snapshot</p>
+            </div>
+            <div class="header-icons">
+              <div class="icon-btn"><svg class="i" viewBox="0 0 24 24"><use href="#icon-bell"/></svg></div>
+              <div class="icon-btn"><svg class="i" viewBox="0 0 24 24"><use href="#icon-person"/></svg></div>
+            </div>
+          </div>
+
+          <div class="stat-row">
+            <div class="stat-card pain"><span class="icon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-pulse"/></svg></span><span class="value">2/10</span><span class="label">Pain</span><span class="sub">Typical for you</span></div>
+            <div class="stat-card"><span class="icon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-drop"/></svg></span><span class="value">1.4L</span><span class="label">Hydration</span><span class="sub">6 glasses</span></div>
+            <div class="stat-card"><span class="icon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-pill"/></svg></span><span class="value">3/3</span><span class="label">Meds</span><span class="sub">Taken today</span></div>
+          </div>
+
+          <div>
+            <div class="section-label" style="margin-bottom:8px;">Quick Log</div>
+            <div class="quicklog-row">
+              <div class="quicklog-pill"><span class="qicon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-pulse"/></svg></span><span class="qlabel">Pain</span></div>
+              <div class="quicklog-pill"><span class="qicon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-drop"/></svg></span><span class="qlabel">Water</span></div>
+              <div class="quicklog-pill"><span class="qicon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-pill"/></svg></span><span class="qlabel">Meds</span></div>
+              <div class="quicklog-pill"><span class="qicon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-thermometer"/></svg></span><span class="qlabel">Symptom</span></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="section-label" style="margin-bottom:10px;">Your Day</div>
+            <div class="timeline">
+              <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-text"><div class="t-time">08:00</div><div class="t-desc">Medication taken</div></div></div>
+              <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-text"><div class="t-time">11:20</div><div class="t-desc">500ml water logged</div></div></div>
+              <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-text"><div class="t-time">14:10</div><div class="t-desc">Pain 2/10 logged</div></div></div>
+            </div>
+          </div>
+
+          <div class="insight-card">
+            <div class="quote">"Your pain has been lower than your recent average."</div>
+            <div class="link">View trend →</div>
+          </div>
+
+          <div class="upcoming-card">
+            <span class="ic"><svg class="i" viewBox="0 0 24 24"><use href="#icon-calendar"/></svg></span>
+            <div><div class="title">Sickle Cell Clinic</div><div class="meta">Thursday · 09:30</div></div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tab active"><span class="ticon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-home"/></svg></span>Today</div>
+          <div class="tab"><span class="ticon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-chart"/></svg></span>Understand</div>
+          <div class="tab"><span class="ticon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-folder"/></svg></span>Prepare</div>
+          <div class="tab"><span class="ticon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-alert"/></svg></span>Emergency</div>
+        </div>
+      </div>
+    </div>
+    <div class="caption">Today — Light</div>
+    <div class="subcaption">Adaptive stat row, one Quick Log entry point, one insight — not five static tiles</div>
+  </div>
+
+  <!-- 2. TODAY - DARK -->
+  <div class="mock">
+    <div class="phone">
+      <div class="screen dark">
+        <div class="dynamic-island"></div>
+        <div class="status-bar"><span>9:41</span><span class="status-icons"><svg class="i" viewBox="0 0 24 24"><use href="#icon-signal"/></svg><svg class="i" viewBox="0 0 24 24"><use href="#icon-battery"/></svg></span></div>
+        <div class="content">
+          <div class="greeting-row">
+            <div class="greeting">
+              <h2>Good morning, Hamza</h2>
+              <p>Here's your health snapshot</p>
+            </div>
+            <div class="header-icons">
+              <div class="icon-btn"><svg class="i" viewBox="0 0 24 24"><use href="#icon-bell"/></svg></div>
+              <div class="icon-btn"><svg class="i" viewBox="0 0 24 24"><use href="#icon-person"/></svg></div>
+            </div>
+          </div>
+
+          <div class="stat-row">
+            <div class="stat-card pain"><span class="icon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-pulse"/></svg></span><span class="value">2/10</span><span class="label">Pain</span><span class="sub">Typical for you</span></div>
+            <div class="stat-card"><span class="icon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-drop"/></svg></span><span class="value">1.4L</span><span class="label">Hydration</span><span class="sub">6 glasses</span></div>
+            <div class="stat-card"><span class="icon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-pill"/></svg></span><span class="value">3/3</span><span class="label">Meds</span><span class="sub">Taken today</span></div>
+          </div>
+
+          <div>
+            <div class="section-label" style="margin-bottom:8px;">Quick Log</div>
+            <div class="quicklog-row">
+              <div class="quicklog-pill"><span class="qicon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-pulse"/></svg></span><span class="qlabel">Pain</span></div>
+              <div class="quicklog-pill"><span class="qicon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-drop"/></svg></span><span class="qlabel">Water</span></div>
+              <div class="quicklog-pill"><span class="qicon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-pill"/></svg></span><span class="qlabel">Meds</span></div>
+              <div class="quicklog-pill"><span class="qicon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-thermometer"/></svg></span><span class="qlabel">Symptom</span></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="section-label" style="margin-bottom:10px;">Your Day</div>
+            <div class="timeline">
+              <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-text"><div class="t-time">08:00</div><div class="t-desc">Medication taken</div></div></div>
+              <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-text"><div class="t-time">11:20</div><div class="t-desc">500ml water logged</div></div></div>
+              <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-text"><div class="t-time">14:10</div><div class="t-desc">Pain 2/10 logged</div></div></div>
+            </div>
+          </div>
+
+          <div class="insight-card">
+            <div class="quote">"Your pain has been lower than your recent average."</div>
+            <div class="link">View trend →</div>
+          </div>
+
+          <div class="upcoming-card">
+            <span class="ic"><svg class="i" viewBox="0 0 24 24"><use href="#icon-calendar"/></svg></span>
+            <div><div class="title">Sickle Cell Clinic</div><div class="meta">Thursday · 09:30</div></div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tab active"><span class="ticon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-home"/></svg></span>Today</div>
+          <div class="tab"><span class="ticon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-chart"/></svg></span>Understand</div>
+          <div class="tab"><span class="ticon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-folder"/></svg></span>Prepare</div>
+          <div class="tab"><span class="ticon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-alert"/></svg></span>Emergency</div>
+        </div>
+      </div>
+    </div>
+    <div class="caption">Today — Dark</div>
+    <div class="subcaption">Re-tinted surfaces, not an inverted palette — brand red reads the same in both modes</div>
+  </div>
+
+  <!-- 3. QUICK LOG -->
+  <div class="mock">
+    <div class="phone">
+      <div class="screen light">
+        <div class="dynamic-island"></div>
+        <div class="status-bar"><span>9:41</span><span class="status-icons"><svg class="i" viewBox="0 0 24 24"><use href="#icon-signal"/></svg><svg class="i" viewBox="0 0 24 24"><use href="#icon-battery"/></svg></span></div>
+        <div class="content">
+          <div class="sheet-handle"></div>
+          <div class="sheet-title">Quick Log</div>
+          <div class="action-grid">
+            <div class="action-tile tile-pain"><span class="ai"><svg class="i" viewBox="0 0 24 24"><use href="#icon-pulse"/></svg></span><span class="al">Pain</span></div>
+            <div class="action-tile tile-med"><span class="ai"><svg class="i" viewBox="0 0 24 24"><use href="#icon-pill"/></svg></span><span class="al">Medication</span></div>
+            <div class="action-tile tile-water"><span class="ai"><svg class="i" viewBox="0 0 24 24"><use href="#icon-drop"/></svg></span><span class="al">Water</span></div>
+            <div class="action-tile tile-symp"><span class="ai"><svg class="i" viewBox="0 0 24 24"><use href="#icon-thermometer"/></svg></span><span class="al">Symptom</span></div>
+            <div class="action-tile tile-weight"><span class="ai"><svg class="i" viewBox="0 0 24 24"><use href="#icon-scale"/></svg></span><span class="al">Weight</span></div>
+            <div class="action-tile tile-mood"><span class="ai"><svg class="i" viewBox="0 0 24 24"><use href="#icon-face"/></svg></span><span class="al">Mood</span></div>
+          </div>
+
+          <div class="section-label">Log Pain — Step 1 of 3</div>
+          <div class="step-card" style="flex:1;">
+            <div class="step-title">How's your pain?</div>
+            <div class="pain-grid">
+              <div class="pain-num">0</div><div class="pain-num">1</div><div class="pain-num">2</div>
+              <div class="pain-num selected">3</div><div class="pain-num">4</div><div class="pain-num">5</div>
+              <div class="pain-num">6</div><div class="pain-num">7</div><div class="pain-num">8</div>
+              <div class="pain-num">9</div><div class="pain-num">10</div>
+            </div>
+            <div class="save-btn">Save now</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="caption">Quick Log</div>
+    <div class="subcaption">One universal entry point; "Save now" always available without finishing optional steps</div>
+  </div>
+
+  <!-- 4. PAIN -->
+  <div class="mock">
+    <div class="phone">
+      <div class="screen light">
+        <div class="dynamic-island"></div>
+        <div class="status-bar"><span>9:41</span><span class="status-icons"><svg class="i" viewBox="0 0 24 24"><use href="#icon-signal"/></svg><svg class="i" viewBox="0 0 24 24"><use href="#icon-battery"/></svg></span></div>
+        <div class="content">
+          <div class="greeting-row" style="margin-bottom:-6px;">
+            <h2 style="font-size:20px;">Pain</h2>
+          </div>
+          <div class="segment">
+            <span>7D</span><span class="sel">30D</span><span>3M</span><span>6M</span><span>1Y</span>
+          </div>
+          <div class="stat-inline-row">
+            <div class="stat-inline"><div class="v">3.2</div><div class="l">Average</div></div>
+            <div class="stat-inline"><div class="v">8</div><div class="l">Highest</div></div>
+            <div class="stat-inline"><div class="v">1</div><div class="l">Lowest</div></div>
+            <div class="stat-inline"><div class="v">6</div><div class="l">Episodes</div></div>
+          </div>
+          <div class="chart-card">
+            <svg viewBox="0 0 240 70" width="100%" height="70">
+              <line x1="0" y1="60" x2="240" y2="60" stroke="#E8E4E0" stroke-width="1"/>
+              <polyline points="0,40 34,30 68,45 102,20 136,35 170,15 204,25 240,10"
+                        fill="none" stroke="#C77A87" stroke-width="2" stroke-linecap="round" opacity="0.55"/>
+              <polyline points="0,40 34,30 68,45 102,20 136,35 170,15 204,25 240,10"
+                        fill="none" stroke="var(--brand)" stroke-width="2.5" stroke-linecap="round"
+                        stroke-dasharray="0 165 300" />
+              <circle cx="240" cy="10" r="4" fill="var(--brand)"/>
+            </svg>
+            <div class="chart-caption">Pain trended down over the last 30 days, averaging 3.2/10 with 6 episodes recorded. Most recent entry: 2/10.</div>
+          </div>
+          <div class="section-label">Recent Episodes</div>
+          <div>
+            <div class="episode-row"><div class="ep-badge">2</div><div class="ep-text"><div class="ep-title">Today, 2:10 PM</div><div class="ep-meta">Lower back · 40 min</div></div></div>
+            <div class="episode-row"><div class="ep-badge">6</div><div class="ep-text"><div class="ep-title">Yesterday, 9:30 AM</div><div class="ep-meta">Joints · 1h 10min</div></div></div>
+            <div class="episode-row"><div class="ep-badge">4</div><div class="ep-text"><div class="ep-title">Mon, 6:45 PM</div><div class="ep-meta">Chest · 25 min</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="caption">Pain</div>
+    <div class="subcaption">Single-hue sequential ramp, thin line, accessible text summary — meaning never carried by color alone</div>
+  </div>
+
+  <!-- 5. CRISIS MODE -->
+  <div class="mock">
+    <div class="phone">
+      <div class="screen crisis">
+        <div class="dynamic-island"></div>
+        <div class="status-bar" style="color:#F5EDEE;"><span>9:41</span><span class="status-icons"><svg class="i" viewBox="0 0 24 24"><use href="#icon-signal"/></svg><svg class="i" viewBox="0 0 24 24"><use href="#icon-battery"/></svg></span></div>
+        <div class="crisis-content">
+          <div class="crisis-label">Pain Episode</div>
+          <div class="crisis-number">8/10</div>
+          <div class="crisis-sub">Lower back</div>
+          <div class="crisis-meta-row">
+            <div class="crisis-meta"><div class="v">10:42 PM</div><div class="l">Started</div></div>
+            <div class="crisis-meta"><div class="v">1h 24m</div><div class="l">Duration</div></div>
+          </div>
+          <div class="crisis-row"><span>My Pain Plan</span><span class="chev">›</span></div>
+          <div class="crisis-row"><span>Medical ID</span><span class="chev">›</span></div>
+          <div class="crisis-row"><span>Caregiver — Call</span><span class="chev"><svg class="i" viewBox="0 0 24 24"><use href="#icon-phone"/></svg></span></div>
+          <div class="crisis-row"><span>Specialist — Call</span><span class="chev"><svg class="i" viewBox="0 0 24 24"><use href="#icon-phone"/></svg></span></div>
+          <div class="crisis-call-btn"><svg class="i" viewBox="0 0 24 24" style="width:1.1em;height:1.1em;"><use href="#icon-phone"/></svg> Call Emergency Services</div>
+        </div>
+      </div>
+    </div>
+    <div class="caption">Crisis Mode</div>
+    <div class="subcaption">User-initiated only, never auto-triggered — large type, minimal navigation, high contrast</div>
+  </div>
+
+  <!-- 6. SETTINGS -->
+  <div class="mock">
+    <div class="phone">
+      <div class="screen light">
+        <div class="dynamic-island"></div>
+        <div class="status-bar"><span>9:41</span><span class="status-icons"><svg class="i" viewBox="0 0 24 24"><use href="#icon-signal"/></svg><svg class="i" viewBox="0 0 24 24"><use href="#icon-battery"/></svg></span></div>
+        <div class="content">
+          <h2 style="font-size:20px; margin:0;">Settings</h2>
+          <div class="profile-row">
+            <div class="avatar">H</div>
+            <div><div class="profile-name">Hamza Idris</div><div class="profile-email">hamza@example.com</div></div>
+          </div>
+          <div class="settings-group">
+            <div class="settings-row"><span class="sicon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-heart"/></svg></span><span class="slabel">Health Profile</span><span class="schev">›</span></div>
+            <div class="settings-row"><span class="sicon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-alert"/></svg></span><span class="slabel">Emergency &amp; Safety</span><span class="schev">›</span></div>
+            <div class="settings-row"><span class="sicon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-pill"/></svg></span><span class="slabel">Medications</span><span class="schev">›</span></div>
+          </div>
+          <div class="settings-group">
+            <div class="settings-row"><span class="sicon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-bell"/></svg></span><span class="slabel">Notifications</span><span class="schev">›</span></div>
+            <div class="settings-row"><span class="sicon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-appearance"/></svg></span><span class="slabel">Appearance</span><span class="schev">›</span></div>
+            <div class="settings-row"><span class="sicon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-accessibility"/></svg></span><span class="slabel">Accessibility</span><span class="schev">›</span></div>
+          </div>
+          <div class="settings-group">
+            <div class="settings-row"><span class="sicon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-lock"/></svg></span><span class="slabel">Privacy &amp; Security</span><span class="schev">›</span></div>
+            <div class="settings-row"><span class="sicon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-box"/></svg></span><span class="slabel">Health Data</span><span class="schev">›</span></div>
+            <div class="settings-row"><span class="sicon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-heart"/></svg></span><span class="slabel">Apple Health</span><span class="schev">›</span></div>
+          </div>
+          <div class="settings-group">
+            <div class="settings-row"><span class="sicon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-chat"/></svg></span><span class="slabel">Support</span><span class="schev">›</span></div>
+            <div class="settings-row"><span class="sicon"><svg class="i" viewBox="0 0 24 24"><use href="#icon-info"/></svg></span><span class="slabel">About Sickle Shield</span><span class="schev">›</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="caption">Settings</div>
+    <div class="subcaption">Grouped sections with drill-down, not 50 toggles on one page — currently missing entirely from the app</div>
+  </div>
+
+  <!-- 7. INSIGHTS -->
+  <div class="mock">
+    <div class="phone">
+      <div class="screen light">
+        <div class="dynamic-island"></div>
+        <div class="status-bar"><span>9:41</span><span class="status-icons"><svg class="i" viewBox="0 0 24 24"><use href="#icon-signal"/></svg><svg class="i" viewBox="0 0 24 24"><use href="#icon-battery"/></svg></span></div>
+        <div class="content">
+          <h2 style="font-size:20px; margin:0;">Insights</h2>
+          <div class="baseline-card">
+            <div class="baseline-title">Your Recent Baseline</div>
+            <div class="baseline-grid">
+              <div class="baseline-item"><div class="bv">2–4/10</div><div class="bl">Typical pain</div></div>
+              <div class="baseline-item"><div class="bv">1.6L</div><div class="bl">Avg. hydration</div></div>
+              <div class="baseline-item"><div class="bv">7h 12m</div><div class="bl">Typical sleep</div></div>
+              <div class="baseline-item"><div class="bv">3</div><div class="bl">Episodes this month</div></div>
+            </div>
+          </div>
+          <div class="section-label">Patterns &amp; Data</div>
+          <div class="insight-list-card">
+            <span class="iic"><svg class="i" viewBox="0 0 24 24"><use href="#icon-trend-down"/></svg></span>
+            <div class="iitext">Your pain has been lower this week than your recent average.<br><span class="tag pattern">Pattern</span></div>
+          </div>
+          <div class="insight-list-card">
+            <span class="iic"><svg class="i" viewBox="0 0 24 24"><use href="#icon-pill"/></svg></span>
+            <div class="iitext">Medication adherence was 91% this month.<br><span class="tag data">Data</span></div>
+          </div>
+          <div class="insight-list-card">
+            <span class="iic"><svg class="i" viewBox="0 0 24 24"><use href="#icon-drop"/></svg></span>
+            <div class="iitext">Pain was more often recorded on days you also logged lower hydration.<br><span class="tag pattern">Pattern</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="caption">Insights</div>
+    <div class="subcaption">Compares you to your own history, not a generic norm — every card is tagged Pattern or Data, never a diagnosis</div>
+  </div>
+
+</div>
+
+</body>
+</html>
