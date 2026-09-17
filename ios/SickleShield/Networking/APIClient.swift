@@ -21,9 +21,10 @@ final class APIClient {
     func request<T: Decodable>(
         _ path: String,
         method: String = "GET",
-        query: [String: String] = [:]
+        query: [String: String] = [:],
+        overrideToken: String? = nil
     ) async throws -> T {
-        let data = try await performRequest(path: path, method: method, query: query, bodyData: nil)
+        let data = try await performRequest(path: path, method: method, query: query, bodyData: nil, overrideToken: overrideToken)
         return try decodeEnvelope(data)
     }
 
@@ -31,29 +32,32 @@ final class APIClient {
         _ path: String,
         method: String = "POST",
         body: B,
-        query: [String: String] = [:]
+        query: [String: String] = [:],
+        overrideToken: String? = nil
     ) async throws -> T {
         let bodyData = try encoder.encode(body)
-        let data = try await performRequest(path: path, method: method, query: query, bodyData: bodyData)
+        let data = try await performRequest(path: path, method: method, query: query, bodyData: bodyData, overrideToken: overrideToken)
         return try decodeEnvelope(data)
     }
 
     func requestVoid(
         _ path: String,
         method: String = "POST",
-        query: [String: String] = [:]
+        query: [String: String] = [:],
+        overrideToken: String? = nil
     ) async throws {
-        _ = try await performRequest(path: path, method: method, query: query, bodyData: nil)
+        _ = try await performRequest(path: path, method: method, query: query, bodyData: nil, overrideToken: overrideToken)
     }
 
     func requestVoid<B: Encodable>(
         _ path: String,
         method: String = "POST",
         body: B,
-        query: [String: String] = [:]
+        query: [String: String] = [:],
+        overrideToken: String? = nil
     ) async throws {
         let bodyData = try encoder.encode(body)
-        _ = try await performRequest(path: path, method: method, query: query, bodyData: bodyData)
+        _ = try await performRequest(path: path, method: method, query: query, bodyData: bodyData, overrideToken: overrideToken)
     }
 
     // MARK: - Multipart upload
@@ -121,7 +125,7 @@ final class APIClient {
 
     // MARK: - Internals
 
-    private func makeRequest(path: String, method: String, query: [String: String]) throws -> URLRequest {
+    private func makeRequest(path: String, method: String, query: [String: String], overrideToken: String? = nil) throws -> URLRequest {
         var components = URLComponents(
             url: APIConfig.baseURL.appendingPathComponent(path),
             resolvingAgainstBaseURL: false
@@ -135,7 +139,9 @@ final class APIClient {
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         // The backend reads the raw token from this header with no "Bearer " prefix.
-        if let token = KeychainHelper.shared.token {
+        // overrideToken lets callers (e.g. the forgot-password reset step) authenticate
+        // with a short-lived token instead of the stored session token.
+        if let token = overrideToken ?? KeychainHelper.shared.token {
             request.setValue(token, forHTTPHeaderField: "Authorization")
         }
         return request
@@ -145,9 +151,10 @@ final class APIClient {
         path: String,
         method: String,
         query: [String: String],
-        bodyData: Data?
+        bodyData: Data?,
+        overrideToken: String? = nil
     ) async throws -> Data {
-        var request = try makeRequest(path: path, method: method, query: query)
+        var request = try makeRequest(path: path, method: method, query: query, overrideToken: overrideToken)
         request.httpBody = bodyData
         return try await send(request)
     }

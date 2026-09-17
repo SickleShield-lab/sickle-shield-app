@@ -1,3 +1,4 @@
+import CoreLocation
 import Foundation
 
 @MainActor
@@ -68,6 +69,8 @@ final class EmergencyViewModel: ObservableObject {
                 CrisisLiveActivityController.start(severity: recentSeverity, contactName: contacts.first?.contactName ?? "your contacts")
                 isCrisisActive = true
             }
+        } catch let error as CLError where error.code == .locationUnknown {
+            sosStatus = "Couldn't determine your location. In the Simulator, set one via Features > Location > Custom Location, then try again."
         } catch {
             sosStatus = error.localizedDescription
         }
