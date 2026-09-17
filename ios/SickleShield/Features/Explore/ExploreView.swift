@@ -1,8 +1,14 @@
 import SwiftUI
 
+enum ExploreDestination: Hashable {
+    case hospitals, appointments, resources, notifications, profile, weight, water
+}
+
 struct ExploreView: View {
     @EnvironmentObject private var session: SessionStore
+    @Environment(AppRouter.self) private var router
     @StateObject private var viewModel = ExploreViewModel()
+    @State private var path: [ExploreDestination] = []
 
     private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -11,6 +17,7 @@ struct ExploreView: View {
     }()
 
     var body: some View {
+        NavigationStack(path: $path) {
         ScrollView {
             VStack(spacing: 0) {
                 GlassHeader {
@@ -24,11 +31,30 @@ struct ExploreView: View {
                                 .foregroundStyle(.white.opacity(0.85))
                         }
                         Spacer()
-                        ZStack {
-                            Circle().fill(Color.white.opacity(0.2)).frame(width: 32, height: 32)
-                            Image(systemName: "bell.fill")
-                                .font(.system(size: 14))
-                                .foregroundStyle(.white)
+                        HStack(spacing: 10) {
+                            Button {
+                                path.append(.notifications)
+                            } label: {
+                                ZStack {
+                                    Circle().fill(Color.white.opacity(0.2)).frame(width: 32, height: 32)
+                                    Image(systemName: "bell.fill")
+                                        .font(.system(size: 14))
+                                        .foregroundStyle(.white)
+                                }
+                            }
+                            .buttonStyle(.plain)
+
+                            Button {
+                                path.append(.profile)
+                            } label: {
+                                ZStack {
+                                    Circle().fill(Color.white.opacity(0.2)).frame(width: 32, height: 32)
+                                    Image(systemName: "person.fill")
+                                        .font(.system(size: 14))
+                                        .foregroundStyle(.white)
+                                }
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
                 }
@@ -47,14 +73,24 @@ struct ExploreView: View {
                                 label: "Pain",
                                 accent: Theme.accent
                             )
-                            StatTile(
-                                value: waterDisplay,
-                                label: "Water"
-                            )
-                            StatTile(
-                                value: weightDisplay,
-                                label: "Weight"
-                            )
+                            Button {
+                                path.append(.water)
+                            } label: {
+                                StatTile(
+                                    value: waterDisplay,
+                                    label: "Water"
+                                )
+                            }
+                            .buttonStyle(.plain)
+                            Button {
+                                path.append(.weight)
+                            } label: {
+                                StatTile(
+                                    value: weightDisplay,
+                                    label: "Weight"
+                                )
+                            }
+                            .buttonStyle(.plain)
                         }
                         .offset(y: -24)
                         .padding(.bottom, -24)
@@ -69,9 +105,15 @@ struct ExploreView: View {
                                 .font(.system(size: 12, weight: .medium))
                                 .foregroundStyle(Theme.ink)
                             HStack(spacing: 10) {
-                                ServiceTile(icon: "cross.case.fill", label: "Hospital")
-                                ServiceTile(icon: "calendar", label: "Appt")
-                                ServiceTile(icon: "bandage.fill", label: "Log crisis")
+                                ServiceTile(icon: "cross.case.fill", label: "Hospital") {
+                                    path.append(.hospitals)
+                                }
+                                ServiceTile(icon: "calendar", label: "Appt") {
+                                    path.append(.appointments)
+                                }
+                                ServiceTile(icon: "bandage.fill", label: "Log crisis") {
+                                    router.logCrisis()
+                                }
                             }
                         }
 
@@ -114,9 +156,14 @@ struct ExploreView: View {
                                     .font(.system(size: 12, weight: .medium))
                                     .foregroundStyle(Theme.ink)
                                 Spacer()
-                                Text("See all")
-                                    .font(.system(size: 11, weight: .medium))
-                                    .foregroundStyle(Theme.deepRed)
+                                Button {
+                                    path.append(.resources)
+                                } label: {
+                                    Text("See all")
+                                        .font(.system(size: 11, weight: .medium))
+                                        .foregroundStyle(Theme.deepRed)
+                                }
+                                .buttonStyle(.plain)
                             }
                             if viewModel.resources.isEmpty {
                                 Text(viewModel.isLoading ? "Loading..." : "No resources yet")
@@ -143,6 +190,25 @@ struct ExploreView: View {
         }
         .refreshable {
             await viewModel.load()
+        }
+        .navigationDestination(for: ExploreDestination.self) { destination in
+            switch destination {
+            case .hospitals:
+                HospitalsListView()
+            case .appointments:
+                AppointmentsListView()
+            case .resources:
+                EducationalResourcesView()
+            case .notifications:
+                NotificationsView()
+            case .profile:
+                ProfileView()
+            case .weight:
+                WeightView()
+            case .water:
+                WaterIntakeView()
+            }
+        }
         }
     }
 
@@ -242,4 +308,5 @@ private struct ResourceCard: View {
 #Preview {
     ExploreView()
         .environmentObject(SessionStore())
+        .environment(AppRouter())
 }

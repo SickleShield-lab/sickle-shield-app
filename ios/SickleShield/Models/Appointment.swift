@@ -17,3 +17,10 @@ struct AppointmentListResponse: Codable {
     let currentPage: Int
     let appointments: [Appointment]
 }
+
+struct CreateAppointmentRequest: Encodable {
+    var doctorName: String?
+    let date: Date
+    let shift: String
+    let time: String
+}

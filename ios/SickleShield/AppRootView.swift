@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AppRootView: View {
     @StateObject private var session = SessionStore()
+    @State private var router = AppRouter()
 
     var body: some View {
         Group {
@@ -12,6 +13,7 @@ struct AppRootView: View {
             }
         }
         .environmentObject(session)
+        .environment(router)
         .task {
             await session.refreshProfile()
         }

@@ -1,6 +1,19 @@
 import Foundation
 
 enum HospitalAPI {
+    static func all() async throws -> HospitalListResponse {
+        try await APIClient.shared.request("hospital/all", method: "GET")
+    }
+
+    static func create(hospitalName: String, location: String) async throws -> Hospital {
+        let body = CreateHospitalRequest(hospitalName: hospitalName, location: location)
+        return try await APIClient.shared.request("hospital/create", method: "POST", body: body)
+    }
+
+    static func delete(id: String) async throws {
+        try await APIClient.shared.requestVoid("hospital/\(id)", method: "DELETE")
+    }
+
     static func emergencyContacts() async throws -> EmergencyContactListResponse {
         try await APIClient.shared.request("hospital/emergency/contacts", method: "GET")
     }

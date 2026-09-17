@@ -68,17 +68,13 @@ export const oneSignalNotify = async (
   const ONE_SIGNAL_APP_ID = config.oneSignal.appId;
   const ONE_SIGNAL_API_KEY = config.oneSignal.apiKey;
 
-  if (!ONE_SIGNAL_APP_ID || !ONE_SIGNAL_API_KEY) {
-    throw new ApiError(
-      500,
-      "Missing OneSignal configuration. Set ONESIGNAL_APP_ID and ONESIGNAL_API_KEY in .env"
-    );
-  }
-
   const user = await prisma.user.findUnique({
     where: { id: userId },
   });
 
+  // Always record the in-app notification - the push send below is
+  // best-effort and must never block a caller whose primary write (e.g.
+  // creating an appointment) already succeeded.
   await prisma.notification.create({
     data: {
       userId,
@@ -87,23 +83,34 @@ export const oneSignalNotify = async (
     },
   });
 
-  if (user?.fcmToken) {
-    await axios.post(
-      "https://onesignal.com/api/v1/notifications",
-      {
-        app_id: ONE_SIGNAL_APP_ID,
-        target_channel: "push",
-        include_subscription_ids: [user.fcmToken],
-        headings: { en: title },
-        contents: { en: body },
-      },
-      {
-        headers: {
-          Authorization: `Basic ${ONE_SIGNAL_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-      }
+  if (!ONE_SIGNAL_APP_ID || !ONE_SIGNAL_API_KEY) {
+    console.log(
+      "[oneSignalNotify] OneSignal not configured - skipping push send, notification recorded in-app only."
     );
+    return;
+  }
+
+  if (user?.fcmToken) {
+    try {
+      await axios.post(
+        "https://onesignal.com/api/v1/notifications",
+        {
+          app_id: ONE_SIGNAL_APP_ID,
+          target_channel: "push",
+          include_subscription_ids: [user.fcmToken],
+          headings: { en: title },
+          contents: { en: body },
+        },
+        {
+          headers: {
+            Authorization: `Basic ${ONE_SIGNAL_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    } catch (error) {
+      console.log("[oneSignalNotify] Push send failed, continuing:", error);
+    }
   }
 
   return;

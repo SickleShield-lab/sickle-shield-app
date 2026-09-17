@@ -2,6 +2,7 @@ import SwiftUI
 
 struct TrackerView: View {
     @EnvironmentObject private var session: SessionStore
+    @Environment(AppRouter.self) private var router
     @StateObject private var viewModel = TrackerViewModel()
     @StateObject private var voiceLogger = VoiceLogger()
 
@@ -202,6 +203,11 @@ struct TrackerView: View {
                 ActivityView(items: [reportURL])
             }
         }
+        .onChange(of: router.pendingCrisisLog) { _, pending in
+            guard pending else { return }
+            withAnimation { showLogForm = true }
+            router.pendingCrisisLog = false
+        }
     }
 
     private var waterDisplay: String {
@@ -290,4 +296,5 @@ private struct PainTrendChart: View {
 #Preview {
     TrackerView()
         .environmentObject(SessionStore())
+        .environment(AppRouter())
 }
