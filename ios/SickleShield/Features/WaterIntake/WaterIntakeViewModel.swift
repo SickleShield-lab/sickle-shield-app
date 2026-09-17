@@ -19,7 +19,8 @@ final class WaterIntakeViewModel {
         }
     }
 
-    func logGlass(_ amount: Int) async {
+    func logGlasses(_ amount: Int) async {
+        guard amount > 0 else { return }
         isLogging = true
         errorMessage = nil
         defer { isLogging = false }

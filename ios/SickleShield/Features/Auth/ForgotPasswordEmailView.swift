@@ -1,28 +1,24 @@
 import SwiftUI
 
-struct LoginView: View {
-    @EnvironmentObject private var session: SessionStore
-    @Binding var showSignUp: Bool
+struct ForgotPasswordEmailView: View {
+    @Binding var dismissAll: Bool
 
     @State private var email = ""
-    @State private var password = ""
     @State private var isLoading = false
     @State private var errorMessage: String?
-    @State private var showForgotPassword = false
+    @State private var showOTP = false
 
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
                 VStack(spacing: 6) {
-                    Image(systemName: "shield.lefthalf.filled")
-                        .font(.system(size: 40))
-                        .foregroundStyle(Theme.deepRed)
-                    Text("Sickle Shield")
+                    Text("Reset password")
                         .font(.system(size: 20, weight: .medium))
                         .foregroundStyle(Theme.ink)
-                    Text("Your health. Your control. Every day.")
+                    Text("Enter your account email and we'll send you a code")
                         .font(.system(size: 12))
                         .foregroundStyle(Theme.muted)
+                        .multilineTextAlignment(.center)
                 }
                 .padding(.top, 40)
 
@@ -33,9 +29,6 @@ struct LoginView: View {
                             .keyboardType(.emailAddress)
                             .autocorrectionDisabled()
                     }
-                    LabeledField(label: "Password") {
-                        SecureField("Enter your password", text: $password)
-                    }
 
                     if let errorMessage {
                         Text(errorMessage)
@@ -44,13 +37,13 @@ struct LoginView: View {
                     }
 
                     Button {
-                        Task { await logIn() }
+                        Task { await sendCode() }
                     } label: {
                         HStack {
                             if isLoading {
                                 ProgressView().tint(Theme.accent)
                             } else {
-                                Text("Sign in")
+                                Text("Send code")
                             }
                         }
                         .font(.system(size: 14, weight: .medium))
@@ -59,23 +52,7 @@ struct LoginView: View {
                         .padding(13)
                     }
                     .neumorphicPressed()
-                    .disabled(isLoading || email.isEmpty || password.isEmpty)
-
-                    Button {
-                        showForgotPassword = true
-                    } label: {
-                        Text("Forgot password?")
-                            .font(.system(size: 12))
-                            .foregroundStyle(Theme.muted)
-                    }
-
-                    Button {
-                        showSignUp = true
-                    } label: {
-                        Text("Don't have an account? Sign up")
-                            .font(.system(size: 12))
-                            .foregroundStyle(Theme.deepRed)
-                    }
+                    .disabled(isLoading || email.isEmpty)
                 }
                 .padding(20)
                 .neumorphicCard()
@@ -83,18 +60,19 @@ struct LoginView: View {
             .padding(20)
         }
         .background(Theme.background.ignoresSafeArea())
-        .navigationDestination(isPresented: $showForgotPassword) {
-            ForgotPasswordEmailView(dismissAll: $showForgotPassword)
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(isPresented: $showOTP) {
+            ForgotPasswordOTPView(email: email, dismissAll: $dismissAll)
         }
     }
 
-    private func logIn() async {
+    private func sendCode() async {
         isLoading = true
         errorMessage = nil
         defer { isLoading = false }
         do {
-            let response = try await AuthAPI.login(email: email, password: password)
-            session.setSession(token: response.accessToken, user: response.userInfo)
+            try await AuthAPI.sendForgotPasswordOtp(email: email)
+            showOTP = true
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -102,6 +80,7 @@ struct LoginView: View {
 }
 
 #Preview {
-    LoginView(showSignUp: .constant(false))
-        .environmentObject(SessionStore())
+    NavigationStack {
+        ForgotPasswordEmailView(dismissAll: .constant(true))
+    }
 }

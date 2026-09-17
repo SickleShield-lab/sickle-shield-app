@@ -66,4 +66,41 @@ enum AuthAPI {
     static func updateProfile(_ payload: UpdateProfileRequest) async throws -> User {
         try await APIClient.shared.request("auth/profile", method: "PATCH", body: payload)
     }
+
+    // MARK: - Forgot password
+
+    struct EmailRequest: Encodable {
+        let email: String
+    }
+
+    struct VerifyOtpRequest: Encodable {
+        let email: String
+        let otp: String
+    }
+
+    struct VerifyOtpResponse: Decodable {
+        let accessToken: String
+    }
+
+    struct ResetPasswordRequest: Encodable {
+        let newPassword: String
+    }
+
+    static func sendForgotPasswordOtp(email: String) async throws {
+        try await APIClient.shared.requestVoid("auth/send-otp", method: "POST", body: EmailRequest(email: email))
+    }
+
+    /// Returns a short-lived token; pass it as `tempToken` to `resetPassword`.
+    static func verifyForgotPasswordOtp(email: String, otp: String) async throws -> String {
+        let response: VerifyOtpResponse = try await APIClient.shared.request(
+            "auth/verify-otp", method: "POST", body: VerifyOtpRequest(email: email, otp: otp)
+        )
+        return response.accessToken
+    }
+
+    static func resetPassword(newPassword: String, tempToken: String) async throws {
+        try await APIClient.shared.requestVoid(
+            "auth/reset-password", method: "PATCH", body: ResetPasswordRequest(newPassword: newPassword), overrideToken: tempToken
+        )
+    }
 }
