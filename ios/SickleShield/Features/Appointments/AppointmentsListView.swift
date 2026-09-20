@@ -44,7 +44,7 @@ struct AppointmentsListView: View {
                         }
                         Text(appointment.status.capitalized)
                             .font(.caption)
-                            .foregroundStyle(Theme.accent)
+                            .foregroundStyle(SSColor.brand)
                     }
                     .swipeActions {
                         Button("Delete", systemImage: "trash", role: .destructive) {

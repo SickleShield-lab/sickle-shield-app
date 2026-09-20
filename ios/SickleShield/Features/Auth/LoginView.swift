@@ -16,13 +16,13 @@ struct LoginView: View {
                 VStack(spacing: 6) {
                     Image(systemName: "shield.lefthalf.filled")
                         .font(.system(size: 40))
-                        .foregroundStyle(Theme.deepRed)
+                        .foregroundStyle(SSColor.brand)
                     Text("Sickle Shield")
                         .font(.system(size: 20, weight: .medium))
-                        .foregroundStyle(Theme.ink)
+                        .foregroundStyle(SSColor.textPrimary)
                     Text("Your health. Your control. Every day.")
                         .font(.system(size: 12))
-                        .foregroundStyle(Theme.muted)
+                        .foregroundStyle(SSColor.textSecondary)
                 }
                 .padding(.top, 40)
 
@@ -40,7 +40,7 @@ struct LoginView: View {
                     if let errorMessage {
                         Text(errorMessage)
                             .font(.system(size: 12))
-                            .foregroundStyle(Theme.deepRed)
+                            .foregroundStyle(SSColor.brand)
                     }
 
                     Button {
@@ -48,13 +48,13 @@ struct LoginView: View {
                     } label: {
                         HStack {
                             if isLoading {
-                                ProgressView().tint(Theme.accent)
+                                ProgressView().tint(SSColor.brand)
                             } else {
                                 Text("Sign in")
                             }
                         }
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(Theme.accent)
+                        .foregroundStyle(SSColor.brand)
                         .frame(maxWidth: .infinity)
                         .padding(13)
                     }
@@ -66,7 +66,7 @@ struct LoginView: View {
                     } label: {
                         Text("Forgot password?")
                             .font(.system(size: 12))
-                            .foregroundStyle(Theme.muted)
+                            .foregroundStyle(SSColor.textSecondary)
                     }
 
                     Button {
@@ -74,7 +74,7 @@ struct LoginView: View {
                     } label: {
                         Text("Don't have an account? Sign up")
                             .font(.system(size: 12))
-                            .foregroundStyle(Theme.deepRed)
+                            .foregroundStyle(SSColor.brand)
                     }
                 }
                 .padding(20)
@@ -82,7 +82,7 @@ struct LoginView: View {
             }
             .padding(20)
         }
-        .background(Theme.background.ignoresSafeArea())
+        .background(SSColor.background.ignoresSafeArea())
         .navigationDestination(isPresented: $showForgotPassword) {
             ForgotPasswordEmailView(dismissAll: $showForgotPassword)
         }

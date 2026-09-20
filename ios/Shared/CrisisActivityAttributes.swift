@@ -1,4 +1,5 @@
 import ActivityKit
+import Foundation
 
 /// Shared between the main app (which starts/updates/ends the activity) and
 /// the widget extension (which renders it on the Lock Screen / Dynamic

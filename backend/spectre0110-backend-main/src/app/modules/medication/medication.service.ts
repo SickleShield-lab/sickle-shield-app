@@ -168,6 +168,23 @@ const createReminder = async (userId: string, payload: Reminder) => {
   });
 };
 
+const updateReminderInDB = async (
+  reminderId: string,
+  userId: string,
+  payload: Partial<Reminder>
+) => {
+  const reminder = await prisma.reminder.findUnique({
+    where: { id: reminderId },
+  });
+  if (!reminder || reminder.userId !== userId) {
+    throw new ApiError(404, "Reminder not found");
+  }
+  return await prisma.reminder.update({
+    where: { id: reminderId },
+    data: payload,
+  });
+};
+
 const deleteReminder = async (reminderId: string, userId: string) => {
   const reminder = await prisma.reminder.findUnique({
     where: { id: reminderId },
@@ -243,6 +260,7 @@ export const medicationServices = {
   uploadReport,
   myReports,
   createReminder,
+  updateReminderInDB,
   myReminders,
   mySingleReminder,
   deleteReminder,

@@ -13,10 +13,10 @@ struct LabeledField<Content: View>: View {
         VStack(alignment: .leading, spacing: 6) {
             Text(label)
                 .font(.system(size: 11))
-                .foregroundStyle(Theme.muted)
+                .foregroundStyle(SSColor.textSecondary)
             content
                 .font(.system(size: 14))
-                .foregroundStyle(Theme.ink)
+                .foregroundStyle(SSColor.textPrimary)
                 .padding(12)
                 .neumorphicCard(radius: 12)
         }

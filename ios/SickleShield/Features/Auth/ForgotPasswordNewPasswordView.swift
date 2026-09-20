@@ -19,7 +19,7 @@ struct ForgotPasswordNewPasswordView: View {
             VStack(spacing: 20) {
                 Text("Set a new password")
                     .font(.system(size: 20, weight: .medium))
-                    .foregroundStyle(Theme.ink)
+                    .foregroundStyle(SSColor.textPrimary)
                     .padding(.top, 40)
 
                 VStack(spacing: 14) {
@@ -33,12 +33,12 @@ struct ForgotPasswordNewPasswordView: View {
                     if passwordsMismatch {
                         Text("Passwords don't match.")
                             .font(.system(size: 12))
-                            .foregroundStyle(Theme.deepRed)
+                            .foregroundStyle(SSColor.brand)
                     }
                     if let errorMessage {
                         Text(errorMessage)
                             .font(.system(size: 12))
-                            .foregroundStyle(Theme.deepRed)
+                            .foregroundStyle(SSColor.brand)
                     }
 
                     Button {
@@ -46,13 +46,13 @@ struct ForgotPasswordNewPasswordView: View {
                     } label: {
                         HStack {
                             if isLoading {
-                                ProgressView().tint(Theme.accent)
+                                ProgressView().tint(SSColor.brand)
                             } else {
                                 Text("Reset password")
                             }
                         }
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(Theme.accent)
+                        .foregroundStyle(SSColor.brand)
                         .frame(maxWidth: .infinity)
                         .padding(13)
                     }
@@ -64,7 +64,7 @@ struct ForgotPasswordNewPasswordView: View {
             }
             .padding(20)
         }
-        .background(Theme.background.ignoresSafeArea())
+        .background(SSColor.background.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(isPresented: $showSuccess) {
             ForgotPasswordSuccessView(dismissAll: $dismissAll)

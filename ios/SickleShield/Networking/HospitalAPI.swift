@@ -5,9 +5,14 @@ enum HospitalAPI {
         try await APIClient.shared.request("hospital/all", method: "GET")
     }
 
-    static func create(hospitalName: String, location: String) async throws -> Hospital {
-        let body = CreateHospitalRequest(hospitalName: hospitalName, location: location)
-        return try await APIClient.shared.request("hospital/create", method: "POST", body: body)
+    static func create(hospitalName: String, location: String, emergencyContacts: [String]) async throws -> Hospital {
+        let payload = CreateHospitalRequest(hospitalName: hospitalName, location: location, emergencyContacts: emergencyContacts)
+        return try await APIClient.shared.request("hospital/create", method: "POST", body: payload)
+    }
+
+    static func update(id: String, hospitalName: String, location: String, emergencyContacts: [String]) async throws -> Hospital {
+        let payload = CreateHospitalRequest(hospitalName: hospitalName, location: location, emergencyContacts: emergencyContacts)
+        return try await APIClient.shared.request("hospital/\(id)", method: "PATCH", body: payload)
     }
 
     static func delete(id: String) async throws {

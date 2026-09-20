@@ -65,7 +65,7 @@ const updateHospitalInDB = async (req: Request) => {
   const payload = req.body;
   const userId = req.user.id;
   const role = req.user.role;
-  let hospitalImages = undefined;
+  let hospitalImages: string | undefined;
 
   const existingHospital = await prisma.hospital.findUnique({
     where: { id: hospitalId },
@@ -78,16 +78,17 @@ const updateHospitalInDB = async (req: Request) => {
   }
 
   if (req.files && "hospitalImages" in req.files) {
-    hospitalImages = await Promise.all(
+    const uploaded = await Promise.all(
       (req.files["hospitalImages"] as Express.Multer.File[]).map((file) =>
         uploadInSpace(file, "hospitalImages")
       )
     );
+    hospitalImages = uploaded[0];
   }
 
   const updatedHospital = await prisma.hospital.update({
     where: { id: hospitalId },
-    data: { ...payload, hospitalImages },
+    data: { ...payload, ...(hospitalImages ? { hospitalImages } : {}) },
   });
 
   return updatedHospital;
@@ -105,7 +106,13 @@ const deleteHospitalFromDB = async (
     throw new ApiError(404, "Hospital not found!");
   }
 
-  return await prisma.hospital.delete({ where: { id } });
+  // Appointments have a required FK to their hospital, so deleting a hospital
+  // that still has appointments would otherwise fail with a P2003 constraint
+  // error and silently leave the hospital in place.
+  return await prisma.$transaction(async (tx) => {
+    await tx.appointment.deleteMany({ where: { hospitalId: id } });
+    return tx.hospital.delete({ where: { id } });
+  });
 };
 
 // create contact

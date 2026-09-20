@@ -18,15 +18,14 @@ final class HospitalsViewModel {
         }
     }
 
-    @discardableResult
-    func addHospital(name: String, location: String) async -> Bool {
-        do {
-            let hospital = try await HospitalAPI.create(hospitalName: name, location: location)
+    /// `HospitalFormSheet` owns the create/update network call itself (same
+    /// pattern as `EditProfileView`/`ChangePasswordView`) and just reports
+    /// back the saved result here.
+    func upsert(_ hospital: Hospital) {
+        if let index = hospitals.firstIndex(where: { $0.id == hospital.id }) {
+            hospitals[index] = hospital
+        } else {
             hospitals.insert(hospital, at: 0)
-            return true
-        } catch {
-            errorMessage = error.localizedDescription
-            return false
         }
     }
 

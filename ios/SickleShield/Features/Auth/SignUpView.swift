@@ -15,7 +15,7 @@ struct SignUpView: View {
             VStack(spacing: 20) {
                 Text("Create account")
                     .font(.system(size: 20, weight: .medium))
-                    .foregroundStyle(Theme.ink)
+                    .foregroundStyle(SSColor.textPrimary)
                     .padding(.top, 40)
 
                 VStack(spacing: 14) {
@@ -35,7 +35,7 @@ struct SignUpView: View {
                     if let errorMessage {
                         Text(errorMessage)
                             .font(.system(size: 12))
-                            .foregroundStyle(Theme.deepRed)
+                            .foregroundStyle(SSColor.brand)
                     }
 
                     Button {
@@ -43,13 +43,13 @@ struct SignUpView: View {
                     } label: {
                         HStack {
                             if isLoading {
-                                ProgressView().tint(Theme.accent)
+                                ProgressView().tint(SSColor.brand)
                             } else {
                                 Text("Sign up")
                             }
                         }
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(Theme.accent)
+                        .foregroundStyle(SSColor.brand)
                         .frame(maxWidth: .infinity)
                         .padding(13)
                     }
@@ -61,7 +61,7 @@ struct SignUpView: View {
                     } label: {
                         Text("Already have an account? Sign in")
                             .font(.system(size: 12))
-                            .foregroundStyle(Theme.deepRed)
+                            .foregroundStyle(SSColor.brand)
                     }
                 }
                 .padding(20)
@@ -69,7 +69,7 @@ struct SignUpView: View {
             }
             .padding(20)
         }
-        .background(Theme.background.ignoresSafeArea())
+        .background(SSColor.background.ignoresSafeArea())
         .navigationDestination(isPresented: $showOTP) {
             OTPVerificationView(email: email, showSignUp: $showSignUp)
         }

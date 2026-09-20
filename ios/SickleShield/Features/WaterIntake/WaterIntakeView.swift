@@ -3,19 +3,21 @@ import SwiftUI
 struct WaterIntakeView: View {
     @State private var viewModel = WaterIntakeViewModel()
     @State private var dragAmount: Int?
+    @State private var dragStartAngle: Double?
+    @State private var dragStartAmount: Int = 0
     @State private var showCelebration = false
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 24) {
+            VStack(spacing: SSSpacing.xxl) {
                 if viewModel.status != nil {
                     dial
-                        .padding(.top, 24)
+                        .padding(.top, SSSpacing.xl)
+                    statusLine
                     Text("Drag the ring to log how many glasses you've had")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
+                        .ssCaption()
                         .multilineTextAlignment(.center)
-                        .padding(.horizontal, 32)
+                        .padding(.horizontal, SSSpacing.xxl)
                 } else if viewModel.isLoading {
                     ProgressView()
                         .padding(.top, 60)
@@ -23,13 +25,19 @@ struct WaterIntakeView: View {
 
                 if let errorMessage = viewModel.errorMessage {
                     Text(errorMessage)
-                        .font(.footnote)
-                        .foregroundStyle(.red)
+                        .ssCaption(color: SSColor.brand)
                 }
             }
-            .padding()
+            .padding(SSSpacing.lg)
             .frame(maxWidth: .infinity)
         }
+        .background(
+            ZStack {
+                SSColor.background
+                SSAmbientBackground()
+            }
+            .ignoresSafeArea()
+        )
         .navigationTitle("Water intake")
         .task { await viewModel.load() }
         .refreshable { await viewModel.load() }
@@ -51,33 +59,41 @@ struct WaterIntakeView: View {
         .animation(.spring(response: 0.35, dampingFraction: 1), value: showCelebration)
     }
 
+    // MARK: - Dial
+
+    /// A drag anywhere on the ring rotates the thumb relative to *where the
+    /// gesture started*, not to the finger's raw absolute angle - tracking
+    /// absolute angle caused the displayed number to lag/mismatch the finger
+    /// during a live drag (an implicit `.animation` retriggering on every
+    /// frame) and created a dead zone below the already-confirmed amount.
     private var dial: some View {
         let target = max(viewModel.status?.target ?? 10, 1)
         let confirmed = viewModel.status?.amount ?? 0
         let displayed = dragAmount ?? confirmed
+        let goalMet = confirmed >= target
+        let ringColor = goalMet ? SSColor.success : SSColor.brand
 
         return GeometryReader { geo in
             let size = min(geo.size.width, geo.size.height)
             ZStack {
                 Circle()
-                    .stroke(Color(uiColor: .systemGray5), lineWidth: 14)
+                    .stroke(SSColor.surfaceSecondary, lineWidth: 14)
                 Circle()
                     .trim(from: 0, to: CGFloat(displayed) / CGFloat(target))
-                    .stroke(Theme.accent, style: StrokeStyle(lineWidth: 14, lineCap: .round))
+                    .stroke(ringColor, style: StrokeStyle(lineWidth: 14, lineCap: .round))
                     .rotationEffect(.degrees(-90))
                 Circle()
-                    .fill(Theme.accent)
+                    .fill(ringColor)
                     .frame(width: 26, height: 26)
                     .offset(x: size / 2 - 7)
-                    .rotationEffect(.degrees(360 * Double(displayed) / Double(target)))
+                    .rotationEffect(.degrees(360 * Double(displayed) / Double(target) - 90))
                     .shadow(radius: 2)
                 VStack(spacing: 4) {
                     Text("\(displayed)")
-                        .font(.system(size: 40, weight: .bold))
+                        .ssDisplay()
                         .contentTransition(.numericText())
                     Text("of \(target) glasses")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .ssCaption()
                 }
             }
             .frame(width: size, height: size)
@@ -89,46 +105,88 @@ struct WaterIntakeView: View {
                         let center = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
                         let dx = value.location.x - center.x
                         let dy = value.location.y - center.y
-                        var degrees = atan2(dy, dx) * 180 / .pi + 90
-                        if degrees < 0 { degrees += 360 }
-                        let fraction = degrees / 360
-                        let rawAmount = Int((fraction * Double(target)).rounded())
+                        var angle = atan2(dy, dx) * 180 / .pi + 90
+                        if angle < 0 { angle += 360 }
+
+                        if dragStartAngle == nil {
+                            dragStartAngle = angle
+                            dragStartAmount = confirmed
+                        }
+
+                        var delta = angle - (dragStartAngle ?? angle)
+                        if delta > 180 { delta -= 360 }
+                        if delta < -180 { delta += 360 }
+
+                        let amountDelta = delta / 360 * Double(target)
+                        let rawAmount = Int((Double(dragStartAmount) + amountDelta).rounded())
                         dragAmount = min(max(rawAmount, confirmed), target)
                     }
                     .onEnded { _ in
-                        if let dragAmount, dragAmount > confirmed {
-                            Task { await viewModel.logGlasses(dragAmount - confirmed) }
+                        dragStartAngle = nil
+                        let finalAmount = dragAmount
+                        if let finalAmount, finalAmount > confirmed {
+                            Task {
+                                await viewModel.logGlasses(finalAmount - confirmed)
+                                withAnimation(.spring(response: 0.3, dampingFraction: 1)) {
+                                    dragAmount = nil
+                                }
+                            }
+                        } else {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 1)) {
+                                dragAmount = nil
+                            }
                         }
-                        dragAmount = nil
                     }
             )
         }
         .frame(width: 220, height: 220)
-        .animation(.spring(response: 0.3, dampingFraction: 1), value: dragAmount)
+    }
+
+    private var statusLine: some View {
+        let target = max(viewModel.status?.target ?? 10, 1)
+        let confirmed = viewModel.status?.amount ?? 0
+        let remaining = target - confirmed
+        let goalMet = confirmed >= target
+
+        return Group {
+            if goalMet {
+                Label("Goal reached, nice work!", systemImage: "checkmark.circle.fill")
+                    .ssSubtext(color: SSColor.success)
+            } else {
+                Text("💧 \(remaining) more to reach today's goal")
+                    .ssSubtext()
+            }
+        }
+        .animation(.spring(response: 0.3, dampingFraction: 1), value: goalMet)
     }
 }
 
 private struct CelebrationOverlay: View {
     let onDismiss: () -> Void
+    @State private var appeared = false
 
     var body: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "checkmark.circle.fill")
+        VStack(spacing: SSSpacing.md) {
+            Text("🎉")
                 .font(.system(size: 56))
-                .foregroundStyle(.green)
+                .scaleEffect(appeared ? 1 : 0.5)
             Text("Goal reached!")
-                .font(.title3.weight(.semibold))
+                .ssTitle()
             Text("You've hit your water intake goal for today.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .ssSubtext()
                 .multilineTextAlignment(.center)
             Button("Nice", action: onDismiss)
-                .buttonStyle(.borderedProminent)
-                .padding(.top, 4)
+                .buttonStyle(.ssPrimary)
+                .padding(.top, SSSpacing.xs)
         }
-        .padding(28)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .padding(40)
+        .padding(SSSpacing.xxl)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: SSRadius.lg, style: .continuous))
+        .padding(SSSpacing.xxxl)
+        .onAppear {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
+                appeared = true
+            }
+        }
         .task {
             try? await Task.sleep(for: .seconds(3))
             onDismiss()

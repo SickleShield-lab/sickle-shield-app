@@ -11,9 +11,15 @@ struct AddAppointmentSheet: View {
     @State private var doctorName = ""
     @State private var date = Date()
     @State private var shift = "Morning"
-    @State private var time = ""
+    @State private var time = Date()
     @State private var isSaving = false
     @State private var errorMessage: String?
+
+    private static let timeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mm a"
+        return formatter
+    }()
 
     init(hospitals: [Hospital], onSave: @escaping (String, String, Date, String, String) async -> Bool) {
         self.hospitals = hospitals
@@ -37,7 +43,7 @@ struct AddAppointmentSheet: View {
                     Picker("Shift", selection: $shift) {
                         ForEach(Self.shifts, id: \.self) { Text($0) }
                     }
-                    TextField("Time, e.g. 10:30 AM", text: $time)
+                    DatePicker("Time", selection: $time, displayedComponents: .hourAndMinute)
                 }
                 if let errorMessage {
                     Text(errorMessage)
@@ -54,7 +60,7 @@ struct AddAppointmentSheet: View {
                     Button {
                         Task {
                             isSaving = true
-                            let saved = await onSave(hospitalId, doctorName, date, shift, time)
+                            let saved = await onSave(hospitalId, doctorName, date, shift, Self.timeFormatter.string(from: time))
                             isSaving = false
                             if saved { dismiss() } else { errorMessage = "Couldn't book this appointment. Try again." }
                         }
@@ -65,7 +71,7 @@ struct AddAppointmentSheet: View {
                             Text("Save")
                         }
                     }
-                    .disabled(isSaving || hospitalId.isEmpty || time.isEmpty)
+                    .disabled(isSaving || hospitalId.isEmpty)
                 }
             }
         }

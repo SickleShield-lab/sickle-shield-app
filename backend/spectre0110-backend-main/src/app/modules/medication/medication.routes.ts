@@ -20,6 +20,11 @@ router.post(
 );
 router.get("/reports/my-reports", auth(), medicationController.myReports);
 router.post("/reminder/create", auth(), medicationController.createReminder);
+router.patch(
+  "/reminders/:reminderId",
+  auth(),
+  medicationController.updateReminder
+);
 router.get("/reminders/my-reminders", auth(), medicationController.myReminders);
 router.delete(
   "/reminders/:reminderId",

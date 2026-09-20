@@ -64,6 +64,27 @@ const deleteWeightGoal = catchAsync(async (req, res) => {
   });
 });
 
+const logWeight = catchAsync(async (req, res) => {
+  const result = await goalServices.logWeightEntryInDB(req.user.id, req.body.weight);
+  sendResponse(res, {
+    statusCode: 201,
+    success: true,
+    message: "Weight logged successfully",
+    data: result,
+  });
+});
+
+const weightHistory = catchAsync(async (req, res) => {
+  const days = req.query.days ? Number(req.query.days) : 30;
+  const result = await goalServices.weightHistoryFromDB(req.user.id, days);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Weight history fetched successfully",
+    data: result,
+  });
+});
+
 const createWaterIntake = catchAsync(async (req, res) => {
   const result = await goalServices.createWaterIntakeInDB(
     req.body,
@@ -93,6 +114,8 @@ export const goalControllers = {
   singleWeightGoal,
   updateWeightGoal,
   deleteWeightGoal,
+  logWeight,
+  weightHistory,
   createWaterIntake,
   getWaterIntakeGoal,
 };

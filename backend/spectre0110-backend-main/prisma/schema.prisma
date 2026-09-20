@@ -8,32 +8,34 @@ generator client {
 }
 
 model User {
-  id           String        @id @default(uuid())
-  username     String
-  email        String        @unique
-  password     String
-  fcmToken     String?
-  profileImage String?
-  lang         String?
-  dob          String?
-  gender       String?
-  smoking      Boolean?
-  diagnosis    String?
-  weight       String?
-  bloodGroup   String?
-  painManager  Int           @default(0)
-  waterIntake  Int           @default(10)
-  mobileNumber String?
-  role         UserRole      @default(USER)
-  status       UserStatus    @default(ACTIVE)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  appointment  Appointment[]
-  medication   Medication[]
-  symptoms     Symptoms[]
-  pain         Pain[]
-  weightGoal   WeightGoal[]
-  waterIntakes WaterIntake[]
+  id            String        @id @default(uuid())
+  username      String
+  email         String        @unique
+  password      String
+  fcmToken      String?
+  profileImage  String?
+  lang          String?
+  dob           String?
+  gender        String?
+  smoking       Boolean?
+  diagnosis     String?
+  weight        String?
+  bloodGroup    String?
+  painManager   Int           @default(0)
+  waterIntake   Int           @default(10)
+  mobileNumber  String?
+  role          UserRole      @default(USER)
+  status        UserStatus    @default(ACTIVE)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  appointment   Appointment[]
+  medication    Medication[]
+  symptoms      Symptoms[]
+  pain          Pain[]
+  weightGoal    WeightGoal[]
+  waterIntakes  WaterIntake[]
+  weightEntries WeightEntry[]
+  moodEntries   MoodEntry[]
 
   @@map("users")
 }
@@ -158,6 +160,35 @@ model WeightGoal {
   @@map("weight_goals")
 }
 
+/// A single logged weight reading - distinct from WeightGoal, which stores
+/// only the start/target pair for a goal period. This is the repeatable
+/// timeseries "log my current weight" entry Quick Log needs.
+model WeightEntry {
+  id        String   @id @default(uuid())
+  userId    String
+  weight    Float
+  loggedAt  DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("weight_entries")
+}
+
+/// A single logged mood check-in.
+model MoodEntry {
+  id        String   @id @default(uuid())
+  userId    String
+  mood      MoodType
+  note      String?
+  loggedAt  DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("mood_entries")
+}
+
 model WaterIntake {
   id        String   @id @default(uuid())
   userId    String   @unique
@@ -260,4 +291,12 @@ enum EatingTime {
 enum EatingAt {
   Before
   After
+}
+
+enum MoodType {
+  great
+  good
+  okay
+  low
+  struggling
 }

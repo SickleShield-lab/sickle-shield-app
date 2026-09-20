@@ -110,6 +110,22 @@ const createReminder = catchAsync(async (req, res) => {
   });
 });
 
+const updateReminder = catchAsync(async (req, res) => {
+  const { reminderId } = req.params;
+  const updatedReminder = await medicationServices.updateReminderInDB(
+    reminderId,
+    req.user.id,
+    req.body
+  );
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Reminder updated successfully",
+    data: updatedReminder,
+  });
+});
+
 const deleteReminder = catchAsync(async (req, res) => {
   const { reminderId } = req.params;
   await medicationServices.deleteReminder(reminderId, req.user.id);
@@ -169,6 +185,7 @@ export const medicationController = {
   uploadReport,
   myReports,
   createReminder,
+  updateReminder,
   myReminders,
   mySingleReminder,
   deleteReminder,

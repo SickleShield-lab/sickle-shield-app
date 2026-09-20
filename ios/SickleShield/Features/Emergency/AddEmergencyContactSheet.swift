@@ -24,7 +24,7 @@ struct AddEmergencyContactSheet: View {
                     if let errorMessage {
                         Text(errorMessage)
                             .font(.system(size: 12))
-                            .foregroundStyle(Theme.deepRed)
+                            .foregroundStyle(SSColor.brand)
                     }
 
                     Button {
@@ -37,13 +37,13 @@ struct AddEmergencyContactSheet: View {
                     } label: {
                         HStack {
                             if isSaving {
-                                ProgressView().tint(Theme.accent)
+                                ProgressView().tint(SSColor.brand)
                             } else {
                                 Text("Save contact")
                             }
                         }
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(Theme.accent)
+                        .foregroundStyle(SSColor.brand)
                         .frame(maxWidth: .infinity)
                         .padding(13)
                     }
@@ -52,7 +52,7 @@ struct AddEmergencyContactSheet: View {
                 }
                 .padding(20)
             }
-            .background(Theme.background.ignoresSafeArea())
+            .background(SSColor.background.ignoresSafeArea())
             .navigationTitle("Emergency contact")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

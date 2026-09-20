@@ -4,6 +4,7 @@ struct EditProfileView: View {
     @EnvironmentObject private var session: SessionStore
     @Environment(\.dismiss) private var dismiss
 
+    @State private var username = ""
     @State private var mobileNumber = ""
     @State private var gender = ""
     @State private var smoking = false
@@ -19,6 +20,8 @@ struct EditProfileView: View {
     var body: some View {
         Form {
             Section("Personal") {
+                TextField("Name", text: $username)
+                    .textContentType(.name)
                 Picker("Gender", selection: $gender) {
                     ForEach(Self.genders, id: \.self) { option in
                         Text(option.isEmpty ? "Not set" : option).tag(option)
@@ -63,6 +66,7 @@ struct EditProfileView: View {
 
     private func prefill() {
         guard let user = session.currentUser else { return }
+        username = user.username
         mobileNumber = user.mobileNumber ?? ""
         gender = user.gender ?? ""
         smoking = user.smoking ?? false
@@ -77,6 +81,7 @@ struct EditProfileView: View {
         errorMessage = nil
         defer { isSaving = false }
         let payload = AuthAPI.UpdateProfileRequest(
+            username: username.isEmpty ? nil : username,
             mobileNumber: mobileNumber.isEmpty ? nil : mobileNumber,
             gender: gender.isEmpty ? nil : gender,
             smoking: smoking,

@@ -1,6 +1,18 @@
 import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
-import { notificationServices } from "./notification.services";
+import { notificationServices, oneSignalNotify } from "./notification.services";
+
+const createNotification = catchAsync(async (req, res) => {
+  const userId = req.user.id;
+  const { title, body } = req.body;
+  await oneSignalNotify(userId, body, title);
+  sendResponse(res, {
+    statusCode: 201,
+    success: true,
+    message: "Notification created successfully",
+    data: null,
+  });
+});
 
 const getNotifications = catchAsync(async (req, res) => {
   const userId = req.user.id;
@@ -30,6 +42,7 @@ const getSingleNotificationById = catchAsync(async (req, res) => {
 });
 
 export const notificationController = {
+  createNotification,
   getNotifications,
   getSingleNotificationById,
 };

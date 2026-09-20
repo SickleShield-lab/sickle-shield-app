@@ -7,7 +7,13 @@ struct AddReminderSheet: View {
     @State private var name = ""
     @State private var type = ""
     @State private var amount = ""
-    @State private var time = ""
+    @State private var time = Date()
+
+    private static let timeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mm a"
+        return formatter
+    }()
 
     var body: some View {
         NavigationStack {
@@ -23,41 +29,43 @@ struct AddReminderSheet: View {
                         TextField("e.g. 2000 IU", text: $amount)
                     }
                     LabeledField(label: "Time") {
-                        TextField("e.g. 08:00 AM", text: $time)
+                        DatePicker("", selection: $time, displayedComponents: .hourAndMinute)
+                            .labelsHidden()
+                            .datePickerStyle(.compact)
                     }
 
                     if let errorMessage = viewModel.errorMessage {
                         Text(errorMessage)
                             .font(.system(size: 12))
-                            .foregroundStyle(Theme.deepRed)
+                            .foregroundStyle(SSColor.brand)
                     }
 
                     Button {
                         Task {
                             let saved = await viewModel.addReminder(
-                                name: name, type: type, amount: amount, time: time
+                                name: name, type: type, amount: amount, time: Self.timeFormatter.string(from: time)
                             )
                             if saved { dismiss() }
                         }
                     } label: {
                         HStack {
                             if viewModel.isSaving {
-                                ProgressView().tint(Theme.accent)
+                                ProgressView().tint(SSColor.brand)
                             } else {
                                 Text("Save reminder")
                             }
                         }
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(Theme.accent)
+                        .foregroundStyle(SSColor.brand)
                         .frame(maxWidth: .infinity)
                         .padding(13)
                     }
                     .neumorphicPressed()
-                    .disabled(viewModel.isSaving || name.isEmpty || type.isEmpty || amount.isEmpty || time.isEmpty)
+                    .disabled(viewModel.isSaving || name.isEmpty || type.isEmpty || amount.isEmpty)
                 }
                 .padding(20)
             }
-            .background(Theme.background.ignoresSafeArea())
+            .background(SSColor.background.ignoresSafeArea())
             .navigationTitle("Add medicine")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

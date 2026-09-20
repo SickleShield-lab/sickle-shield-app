@@ -13,6 +13,7 @@ final class RemindersViewModel: ObservableObject {
         defer { isLoading = false }
         do {
             reminders = try await MedicationAPI.myReminders()
+            LocalNotificationScheduler.resyncMedicationReminders(reminders)
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -23,6 +24,7 @@ final class RemindersViewModel: ObservableObject {
         isSaving = true
         defer { isSaving = false }
         do {
+            await LocalNotificationScheduler.requestAuthorizationIfNeeded()
             try await MedicationAPI.createReminder(
                 medicineName: name,
                 medicineType: type,
@@ -41,6 +43,7 @@ final class RemindersViewModel: ObservableObject {
         do {
             try await MedicationAPI.deleteReminder(id: reminder.id)
             reminders.removeAll { $0.id == reminder.id }
+            LocalNotificationScheduler.cancelMedicationReminder(reminder)
         } catch {
             errorMessage = error.localizedDescription
         }

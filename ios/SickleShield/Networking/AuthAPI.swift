@@ -25,6 +25,8 @@ enum AuthAPI {
     }
 
     struct UpdateProfileRequest: Encodable {
+        var username: String?
+        var password: String?
         var mobileNumber: String?
         var lang: String?
         var gender: String?

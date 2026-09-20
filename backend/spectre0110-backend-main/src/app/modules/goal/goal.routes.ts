@@ -8,6 +8,13 @@ const router = express.Router();
 
 router.post("/weight/create", auth(), goalControllers.createWeightGoal);
 router.get("/weight/goals", auth(), goalControllers.getWeightGoals);
+router.post(
+  "/weight/log",
+  auth(),
+  validateRequest(goalValidation.logWeightSchema),
+  goalControllers.logWeight
+);
+router.get("/weight/history", auth(), goalControllers.weightHistory);
 router.get("/weight/:weightId", auth(), goalControllers.singleWeightGoal);
 router.patch("/weight/:weightId", auth(), goalControllers.updateWeightGoal);
 router.delete("/weight/:weightId", auth(), goalControllers.deleteWeightGoal);

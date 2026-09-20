@@ -19,10 +19,10 @@ struct SetUpProfileView: View {
                     VStack(spacing: 6) {
                         Text("Set up your profile")
                             .font(.system(size: 20, weight: .medium))
-                            .foregroundStyle(Theme.ink)
+                            .foregroundStyle(SSColor.textPrimary)
                         Text("A few details help us tailor your crisis risk score and care tips.")
                             .font(.system(size: 12))
-                            .foregroundStyle(Theme.muted)
+                            .foregroundStyle(SSColor.textSecondary)
                             .multilineTextAlignment(.center)
                     }
                     .padding(.top, 40)
@@ -47,7 +47,7 @@ struct SetUpProfileView: View {
                         if let errorMessage {
                             Text(errorMessage)
                                 .font(.system(size: 12))
-                                .foregroundStyle(Theme.deepRed)
+                                .foregroundStyle(SSColor.brand)
                         }
 
                         Button {
@@ -55,13 +55,13 @@ struct SetUpProfileView: View {
                         } label: {
                             HStack {
                                 if isSaving {
-                                    ProgressView().tint(Theme.accent)
+                                    ProgressView().tint(SSColor.brand)
                                 } else {
                                     Text("Continue")
                                 }
                             }
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundStyle(Theme.accent)
+                            .foregroundStyle(SSColor.brand)
                             .frame(maxWidth: .infinity)
                             .padding(13)
                         }
@@ -70,14 +70,14 @@ struct SetUpProfileView: View {
 
                         Button("Skip for now", action: onFinish)
                             .font(.system(size: 12))
-                            .foregroundStyle(Theme.muted)
+                            .foregroundStyle(SSColor.textSecondary)
                     }
                     .padding(20)
                     .neumorphicCard()
                 }
                 .padding(20)
             }
-            .background(Theme.background.ignoresSafeArea())
+            .background(SSColor.background.ignoresSafeArea())
         }
     }
 
