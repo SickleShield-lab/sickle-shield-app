@@ -24,7 +24,7 @@ struct RemindersView: View {
                         if viewModel.reminders.isEmpty {
                             Text(viewModel.isLoading ? "Loading..." : "No reminders yet")
                                 .font(.system(size: 12))
-                                .foregroundStyle(Theme.muted)
+                                .foregroundStyle(SSColor.textSecondary)
                                 .padding(.top, 20)
                         } else {
                             VStack(spacing: 10) {
@@ -33,15 +33,15 @@ struct RemindersView: View {
                                         VStack(alignment: .leading, spacing: 2) {
                                             Text(reminder.medicineName)
                                                 .font(.system(size: 13, weight: .medium))
-                                                .foregroundStyle(Theme.ink)
+                                                .foregroundStyle(SSColor.textPrimary)
                                             Text("\(reminder.medicineType) · \(reminder.amount)")
                                                 .font(.system(size: 10))
-                                                .foregroundStyle(Theme.muted)
+                                                .foregroundStyle(SSColor.textSecondary)
                                         }
                                         Spacer()
                                         Text(reminder.reminderTime)
                                             .font(.system(size: 10, weight: .medium))
-                                            .foregroundStyle(Theme.ink)
+                                            .foregroundStyle(SSColor.textPrimary)
                                             .padding(.horizontal, 9)
                                             .padding(.vertical, 4)
                                             .neumorphicPressed(radius: 9)
@@ -50,7 +50,7 @@ struct RemindersView: View {
                                         } label: {
                                             Image(systemName: "trash")
                                                 .font(.system(size: 13))
-                                                .foregroundStyle(Theme.muted)
+                                                .foregroundStyle(SSColor.textSecondary)
                                         }
                                         .buttonStyle(.plain)
                                         .padding(.leading, 4)
@@ -66,7 +66,7 @@ struct RemindersView: View {
                         } label: {
                             Text("Add medicine")
                                 .font(.system(size: 13, weight: .medium))
-                                .foregroundStyle(Theme.accent)
+                                .foregroundStyle(SSColor.brand)
                                 .frame(maxWidth: .infinity)
                                 .padding(13)
                         }
@@ -76,7 +76,7 @@ struct RemindersView: View {
                 }
             }
         }
-        .background(Theme.background.ignoresSafeArea())
+        .background(SSColor.background.ignoresSafeArea())
         .task {
             await viewModel.load()
         }

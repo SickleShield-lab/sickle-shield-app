@@ -85,6 +85,9 @@ private struct ResourceDetailView: View {
         .navigationTitle("Article")
         .navigationBarTitleDisplayMode(.inline)
         .task {
+            // Placeholder resources aren't backed by the API - skip the
+            // fetch rather than showing a spurious 404 under fine content.
+            guard !resourceId.hasPrefix(PlaceholderResources.placeholderIDPrefix) else { return }
             do {
                 resource = try await ResourceAPI.single(id: resourceId)
             } catch {

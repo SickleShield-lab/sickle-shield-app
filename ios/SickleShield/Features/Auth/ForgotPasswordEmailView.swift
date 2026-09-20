@@ -14,10 +14,10 @@ struct ForgotPasswordEmailView: View {
                 VStack(spacing: 6) {
                     Text("Reset password")
                         .font(.system(size: 20, weight: .medium))
-                        .foregroundStyle(Theme.ink)
+                        .foregroundStyle(SSColor.textPrimary)
                     Text("Enter your account email and we'll send you a code")
                         .font(.system(size: 12))
-                        .foregroundStyle(Theme.muted)
+                        .foregroundStyle(SSColor.textSecondary)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.top, 40)
@@ -33,7 +33,7 @@ struct ForgotPasswordEmailView: View {
                     if let errorMessage {
                         Text(errorMessage)
                             .font(.system(size: 12))
-                            .foregroundStyle(Theme.deepRed)
+                            .foregroundStyle(SSColor.brand)
                     }
 
                     Button {
@@ -41,13 +41,13 @@ struct ForgotPasswordEmailView: View {
                     } label: {
                         HStack {
                             if isLoading {
-                                ProgressView().tint(Theme.accent)
+                                ProgressView().tint(SSColor.brand)
                             } else {
                                 Text("Send code")
                             }
                         }
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(Theme.accent)
+                        .foregroundStyle(SSColor.brand)
                         .frame(maxWidth: .infinity)
                         .padding(13)
                     }
@@ -59,7 +59,7 @@ struct ForgotPasswordEmailView: View {
             }
             .padding(20)
         }
-        .background(Theme.background.ignoresSafeArea())
+        .background(SSColor.background.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(isPresented: $showOTP) {
             ForgotPasswordOTPView(email: email, dismissAll: $dismissAll)

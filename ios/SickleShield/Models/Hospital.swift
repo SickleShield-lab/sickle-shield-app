@@ -6,6 +6,7 @@ struct Hospital: Codable, Identifiable {
     let userId: String
     let location: String
     let hospitalImages: String?
+    let emergencyContacts: [String]
     let createdAt: Date
     let updatedAt: Date
 }
@@ -20,4 +21,5 @@ struct HospitalListResponse: Codable {
 struct CreateHospitalRequest: Encodable {
     let hospitalName: String
     let location: String
+    let emergencyContacts: [String]
 }

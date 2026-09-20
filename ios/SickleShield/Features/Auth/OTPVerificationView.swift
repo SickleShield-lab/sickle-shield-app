@@ -15,10 +15,10 @@ struct OTPVerificationView: View {
                 VStack(spacing: 6) {
                     Text("Verify your email")
                         .font(.system(size: 20, weight: .medium))
-                        .foregroundStyle(Theme.ink)
+                        .foregroundStyle(SSColor.textPrimary)
                     Text("Enter the 4-digit code sent to \(email)")
                         .font(.system(size: 12))
-                        .foregroundStyle(Theme.muted)
+                        .foregroundStyle(SSColor.textSecondary)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.top, 40)
@@ -28,14 +28,14 @@ struct OTPVerificationView: View {
                         .keyboardType(.numberPad)
                         .multilineTextAlignment(.center)
                         .font(.system(size: 22, weight: .medium))
-                        .foregroundStyle(Theme.ink)
+                        .foregroundStyle(SSColor.textPrimary)
                         .padding(12)
                         .neumorphicCard(radius: 12)
 
                     if let errorMessage {
                         Text(errorMessage)
                             .font(.system(size: 12))
-                            .foregroundStyle(Theme.deepRed)
+                            .foregroundStyle(SSColor.brand)
                     }
 
                     Button {
@@ -43,13 +43,13 @@ struct OTPVerificationView: View {
                     } label: {
                         HStack {
                             if isLoading {
-                                ProgressView().tint(Theme.accent)
+                                ProgressView().tint(SSColor.brand)
                             } else {
                                 Text("Verify")
                             }
                         }
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(Theme.accent)
+                        .foregroundStyle(SSColor.brand)
                         .frame(maxWidth: .infinity)
                         .padding(13)
                     }
@@ -61,7 +61,7 @@ struct OTPVerificationView: View {
             }
             .padding(20)
         }
-        .background(Theme.background.ignoresSafeArea())
+        .background(SSColor.background.ignoresSafeArea())
     }
 
     private func verify() async {

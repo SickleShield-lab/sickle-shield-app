@@ -9,16 +9,16 @@ struct GlassHeader<Content: View>: View {
 
     var body: some View {
         ZStack {
-            Theme.background
+            SSColor.background
 
             Circle()
-                .fill(Theme.deepRed.opacity(0.6))
+                .fill(SSColor.brand.opacity(0.6))
                 .frame(width: 130, height: 130)
                 .blur(radius: 18)
                 .offset(x: 100, y: -70)
 
             Circle()
-                .fill(Theme.deepRedDark.opacity(0.5))
+                .fill(SSColor.brand.opacity(0.5))
                 .frame(width: 100, height: 100)
                 .blur(radius: 18)
                 .offset(x: -110, y: -20)
@@ -28,7 +28,7 @@ struct GlassHeader<Content: View>: View {
             }
             .padding(14)
             .background(.ultraThinMaterial)
-            .background(Theme.deepRed.opacity(0.35))
+            .background(SSColor.brand.opacity(0.35))
             .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 22, style: .continuous)

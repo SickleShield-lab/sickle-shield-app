@@ -9,6 +9,7 @@ import { symtomsRoute } from "../modules/symptoms/symptoms.routes";
 import { painRoute } from "../modules/pain/pain.routes";
 import { goalRoute } from "../modules/goal/goal.routes";
 import { notificationsRoute } from "../modules/notifications/notification.route";
+import { moodRoute } from "../modules/mood/mood.routes";
 
 const router = express.Router();
 
@@ -53,6 +54,10 @@ const moduleRoutes = [
   {
     path: "/notifications",
     route: notificationsRoute,
+  },
+  {
+    path: "/mood",
+    route: moodRoute,
   },
 ];
 

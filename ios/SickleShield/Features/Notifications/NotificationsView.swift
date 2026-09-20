@@ -33,7 +33,7 @@ struct NotificationsView: View {
                                 .font(.headline)
                             if !notification.read {
                                 Circle()
-                                    .fill(Theme.accent)
+                                    .fill(SSColor.brand)
                                     .frame(width: 8, height: 8)
                             }
                         }

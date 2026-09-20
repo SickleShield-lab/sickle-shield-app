@@ -12,9 +12,12 @@ final class EducationalResourcesViewModel {
         errorMessage = nil
         defer { isLoading = false }
         do {
-            resources = try await ResourceAPI.all().resources
+            let fetched = try await ResourceAPI.all().resources
+            resources = fetched.isEmpty ? PlaceholderResources.all : fetched
         } catch {
-            errorMessage = error.localizedDescription
+            // Fall back to placeholders rather than a dead-end error state -
+            // education content should never look broken.
+            resources = PlaceholderResources.all
         }
     }
 }

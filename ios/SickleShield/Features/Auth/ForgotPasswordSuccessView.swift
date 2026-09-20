@@ -11,10 +11,10 @@ struct ForgotPasswordSuccessView: View {
                 .foregroundStyle(.green)
             Text("Password changed")
                 .font(.system(size: 20, weight: .medium))
-                .foregroundStyle(Theme.ink)
+                .foregroundStyle(SSColor.textPrimary)
             Text("You can now sign in with your new password.")
                 .font(.system(size: 13))
-                .foregroundStyle(Theme.muted)
+                .foregroundStyle(SSColor.textSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
             Spacer()
@@ -24,14 +24,14 @@ struct ForgotPasswordSuccessView: View {
             } label: {
                 Text("Back to sign in")
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundStyle(Theme.accent)
+                    .foregroundStyle(SSColor.brand)
                     .frame(maxWidth: .infinity)
                     .padding(13)
             }
             .neumorphicPressed()
             .padding(20)
         }
-        .background(Theme.background.ignoresSafeArea())
+        .background(SSColor.background.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
     }

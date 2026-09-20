@@ -10,6 +10,8 @@ final class EmergencyViewModel: ObservableObject {
     @Published var isSendingSOS = false
     @Published var pendingSOSURL: URL?
     @Published var isCrisisActive = false
+    @Published var crisisStartedAt: Date?
+    @Published var crisisSeverity: Int?
 
     private let locationManager = LocationManager()
 
@@ -34,10 +36,10 @@ final class EmergencyViewModel: ObservableObject {
         }
     }
 
-    func triggerSOS() async {
+    func triggerSOS(to selectedContacts: [EmergencyContact]) async {
         guard !isSendingSOS else { return }
-        guard !contacts.isEmpty else {
-            sosStatus = "Add an emergency contact first."
+        guard !selectedContacts.isEmpty else {
+            sosStatus = "Select at least one contact first."
             return
         }
         isSendingSOS = true
@@ -52,7 +54,7 @@ final class EmergencyViewModel: ObservableObject {
             let blackBox = await Self.blackBoxSummary()
 
             let message = "SOS from Sickle Shield - I need help.\nLocation: \(mapsLink)\(blackBox)"
-            let numbers = contacts.map(\.contactNumber).joined(separator: ",")
+            let numbers = selectedContacts.map(\.contactNumber).joined(separator: ",")
 
             guard
                 let encodedBody = message.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
@@ -66,7 +68,7 @@ final class EmergencyViewModel: ObservableObject {
 
             if #available(iOS 16.1, *) {
                 let recentSeverity = (try? await PainAPI.history(days: 1))?.painRecords.last?.rating ?? 5
-                CrisisLiveActivityController.start(severity: recentSeverity, contactName: contacts.first?.contactName ?? "your contacts")
+                CrisisLiveActivityController.start(severity: recentSeverity, contactName: selectedContacts.first?.contactName ?? "your contacts")
                 isCrisisActive = true
             }
         } catch let error as CLError where error.code == .locationUnknown {
@@ -76,10 +78,39 @@ final class EmergencyViewModel: ObservableObject {
         }
     }
 
+    /// Starts the full Crisis Mode experience: logs a real pain entry so the
+    /// crisis shows up in Tracker history like any other, and uses that
+    /// entry's `createdAt` as the timer's start time rather than a separate
+    /// local-only timestamp.
+    @discardableResult
+    func startCrisisMode(severity: Int) async -> Bool {
+        do {
+            let entry = try await PainAPI.createPain(
+                pain: "Crisis",
+                sensation: "Reported via app",
+                frequency: "Crisis Mode",
+                rating: severity
+            )
+            crisisSeverity = severity
+            crisisStartedAt = entry.createdAt
+            isCrisisActive = true
+            if #available(iOS 16.1, *) {
+                CrisisLiveActivityController.start(severity: severity, contactName: contacts.first?.contactName ?? "your contacts")
+            }
+            return true
+        } catch {
+            errorMessage = error.localizedDescription
+            return false
+        }
+    }
+
     func endCrisis() {
-        guard #available(iOS 16.1, *) else { return }
-        CrisisLiveActivityController.endAll()
+        if #available(iOS 16.1, *) {
+            CrisisLiveActivityController.endAll()
+        }
         isCrisisActive = false
+        crisisStartedAt = nil
+        crisisSeverity = nil
     }
 
     /// Best-effort summary of the last 24h of pain logs and today's water

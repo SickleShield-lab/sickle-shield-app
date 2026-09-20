@@ -3,7 +3,7 @@ import SwiftUI
 struct StatTile: View {
     let value: String
     let label: String
-    var accent: Color = Theme.ink
+    var accent: Color = SSColor.textPrimary
 
     var body: some View {
         VStack(spacing: 4) {
@@ -12,7 +12,7 @@ struct StatTile: View {
                 .foregroundStyle(accent)
             Text(label)
                 .font(.system(size: 9))
-                .foregroundStyle(Theme.muted)
+                .foregroundStyle(SSColor.textSecondary)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)

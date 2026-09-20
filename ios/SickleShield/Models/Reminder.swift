@@ -17,3 +17,7 @@ struct CreateReminderRequest: Encodable {
     let amount: String
     let reminderTime: String
 }
+
+struct UpdateReminderTimeRequest: Encodable {
+    let reminderTime: String
+}

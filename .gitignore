@@ -8,3 +8,4 @@ ios/*.xcodeproj/
 ios/**/xcuserdata/
 ios/DerivedData/
 ios/.build/
+ios/build/

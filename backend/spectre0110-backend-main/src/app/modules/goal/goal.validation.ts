@@ -7,6 +7,14 @@ const createWaterIntakeSchema = z.object({
     .max(10, "water intake maximum 10 glasses"),
 });
 
+const logWeightSchema = z.object({
+  weight: z
+    .number()
+    .positive("weight must be a positive number")
+    .max(1000, "weight seems too high"),
+});
+
 export const goalValidation = {
   createWaterIntakeSchema,
+  logWeightSchema,
 };

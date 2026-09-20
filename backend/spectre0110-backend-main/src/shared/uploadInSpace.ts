@@ -2,6 +2,7 @@ import { S3Client, S3ClientConfig, ObjectCannedACL } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import path from "path";
 import config from "../config";
+import { verifyFileSignature } from "./verifyFileSignature";
 
 const DO_CONFIG = {
   endpoint: config.doSpaces.endpoint as string,
@@ -33,7 +34,7 @@ const s3Config: S3ClientConfig = {
 
 const s3 = new S3Client(s3Config);
 
-const MAX_FILE_SIZE = 3000 * 1024 * 1024; // 3000 MB
+const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB - was 3000MB, far more than any report/photo/hospital image needs
 
 // Allowed MIME types
 const ALLOWED_MIME_TYPES = [
@@ -73,10 +74,14 @@ export const uploadInSpace = async (
       );
     }
 
-    // Validate file type
+    // Validate file type (declared) ...
     if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
       throw new Error("File type not allowed");
     }
+
+    // ... then verify the file's actual bytes match that declared type -
+    // the check above only trusts the client-supplied Content-Type header.
+    verifyFileSignature(file);
 
     // Generate a unique filename with original extension
     const fileExtension = path.extname(file.originalname);

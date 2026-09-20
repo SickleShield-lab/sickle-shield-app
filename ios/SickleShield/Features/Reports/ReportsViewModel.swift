@@ -19,7 +19,7 @@ final class ReportsViewModel: ObservableObject {
     }
 
     @discardableResult
-    func upload(name: String, imageData: Data) async -> Bool {
+    func upload(name: String, fileData: Data, fileName: String, mimeType: String) async -> Bool {
         isSaving = true
         errorMessage = nil
         defer { isSaving = false }
@@ -27,9 +27,9 @@ final class ReportsViewModel: ObservableObject {
             try await MedicationAPI.uploadReport(
                 reportName: name,
                 date: Date(),
-                fileData: imageData,
-                fileName: "\(UUID().uuidString).jpg",
-                mimeType: "image/jpeg"
+                fileData: fileData,
+                fileName: fileName,
+                mimeType: mimeType
             )
             await load()
             return true

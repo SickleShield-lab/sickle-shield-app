@@ -107,6 +107,39 @@ const deleteWeightGoalFromDB = async (userId: string, weightId: string) => {
   return;
 };
 
+const logWeightEntryInDB = async (userId: string, weight: number) => {
+  const existingUser = await prisma.user.findUnique({ where: { id: userId } });
+  if (!existingUser) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const result = await prisma.weightEntry.create({
+    data: { userId, weight },
+  });
+
+  // Keep the profile's headline weight field in sync with the latest
+  // logged entry, since other screens (Profile, Explore stat tile) read
+  // User.weight directly rather than querying weight history.
+  await prisma.user.update({
+    where: { id: userId },
+    data: { weight: String(weight) },
+  });
+
+  return result;
+};
+
+const weightHistoryFromDB = async (userId: string, days: number) => {
+  const since = new Date();
+  since.setDate(since.getDate() - days);
+
+  const entries = await prisma.weightEntry.findMany({
+    where: { userId, loggedAt: { gte: since } },
+    orderBy: { loggedAt: "desc" },
+  });
+
+  return entries;
+};
+
 const createWaterIntakeInDB = async (payload: WaterIntake, userId: string) => {
   const userInfo = await prisma.user.findUnique({
     where: {
@@ -116,13 +149,24 @@ const createWaterIntakeInDB = async (payload: WaterIntake, userId: string) => {
   if (!userInfo) {
     throw new ApiError(404, "User not found");
   }
+
+  // WaterIntake has exactly one row per user (no per-day rows), so "today's
+  // total" is tracked by resetting `amount` whenever the last write wasn't
+  // from today, and incrementing it otherwise. The client only ever sends
+  // the delta for this log call, not a running total.
+  const existing = await prisma.waterIntake.findUnique({
+    where: { userId },
+  });
+  const startOfToday = new Date(new Date().setHours(0, 0, 0, 0));
+  const isNewDay = !existing || existing.updatedAt < startOfToday;
+
   const result = await prisma.waterIntake.upsert({
     where: {
       userId,
     },
-    update: {
-      amount: payload.amount,
-    },
+    update: isNewDay
+      ? { amount: payload.amount }
+      : { amount: { increment: payload.amount } },
     create: {
       ...payload,
       userId,
@@ -178,6 +222,8 @@ export const goalServices = {
   singleWeightGoalFromDB,
   updateWeightGoalInDB,
   deleteWeightGoalFromDB,
+  logWeightEntryInDB,
+  weightHistoryFromDB,
   createWaterIntakeInDB,
   getWaterIntakeFromDB,
 };

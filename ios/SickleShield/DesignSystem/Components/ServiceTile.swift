@@ -10,10 +10,10 @@ struct ServiceTile: View {
             VStack(spacing: 4) {
                 Image(systemName: icon)
                     .font(.system(size: 18))
-                    .foregroundStyle(Theme.accent)
+                    .foregroundStyle(SSColor.brand)
                 Text(label)
                     .font(.system(size: 10))
-                    .foregroundStyle(Theme.ink)
+                    .foregroundStyle(SSColor.textPrimary)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)

@@ -37,13 +37,13 @@ struct OnboardingView: View {
                     VStack(spacing: 20) {
                         Image(systemName: slide.systemImage)
                             .font(.system(size: 64))
-                            .foregroundStyle(Theme.deepRed)
+                            .foregroundStyle(SSColor.brand)
                         Text(slide.title)
                             .font(.system(size: 22, weight: .semibold))
-                            .foregroundStyle(Theme.ink)
+                            .foregroundStyle(SSColor.textPrimary)
                         Text(slide.subtitle)
                             .font(.system(size: 14))
-                            .foregroundStyle(Theme.muted)
+                            .foregroundStyle(SSColor.textSecondary)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 32)
                     }
@@ -62,7 +62,7 @@ struct OnboardingView: View {
             } label: {
                 Text(selection < slides.count - 1 ? "Next" : "Get started")
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundStyle(Theme.accent)
+                    .foregroundStyle(SSColor.brand)
                     .frame(maxWidth: .infinity)
                     .padding(13)
             }
@@ -71,10 +71,10 @@ struct OnboardingView: View {
 
             Button("Skip", action: onFinish)
                 .font(.system(size: 12))
-                .foregroundStyle(Theme.muted)
+                .foregroundStyle(SSColor.textSecondary)
                 .padding(.vertical, 16)
         }
-        .background(Theme.background.ignoresSafeArea())
+        .background(SSColor.background.ignoresSafeArea())
     }
 }
 

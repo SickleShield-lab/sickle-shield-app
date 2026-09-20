@@ -6,9 +6,9 @@ struct RootTabView: View {
     var body: some View {
         @Bindable var router = router
         TabView(selection: $router.selectedTab) {
-            ExploreView()
-                .tabItem { Label("Explore", systemImage: "house.fill") }
-                .tag(AppTab.explore)
+            TodayView()
+                .tabItem { Label("Today", systemImage: "house.fill") }
+                .tag(AppTab.today)
             TrackerView()
                 .tabItem { Label("Tracker", systemImage: "waveform.path.ecg") }
                 .tag(AppTab.tracker)
@@ -22,6 +22,6 @@ struct RootTabView: View {
                 .tabItem { Label("Emergency", systemImage: "phone.fill") }
                 .tag(AppTab.emergency)
         }
-        .tint(Theme.deepRed)
+        .tint(SSColor.brand)
     }
 }

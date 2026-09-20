@@ -10,6 +10,8 @@ struct TrackerView: View {
     @State private var severity: Double = 5
     @State private var selectedTriggers: Set<String> = []
     @State private var voiceLocation: String?
+    @State private var bodyLocation: String?
+    @State private var selectedMedication: String?
     @State private var showShareSheet = false
     @State private var reportURL: URL?
     private let triggers = ["Dehydration", "Cold", "Stress"]
@@ -35,7 +37,7 @@ struct TrackerView: View {
                             HStack {
                                 Text("Pain trend, last 7 days")
                                     .font(.system(size: 11))
-                                    .foregroundStyle(Theme.muted)
+                                    .foregroundStyle(SSColor.textSecondary)
                                 Spacer()
                                 Button {
                                     exportReport()
@@ -45,7 +47,7 @@ struct TrackerView: View {
                                         Text("Export")
                                     }
                                     .font(.system(size: 10, weight: .medium))
-                                    .foregroundStyle(Theme.deepRed)
+                                    .foregroundStyle(SSColor.brand)
                                 }
                                 .buttonStyle(.plain)
                                 .disabled(viewModel.painRecords.isEmpty)
@@ -56,12 +58,32 @@ struct TrackerView: View {
                             } else {
                                 Text(viewModel.isLoading ? "Loading..." : "Log a few crises to see your trend")
                                     .font(.system(size: 11))
-                                    .foregroundStyle(Theme.muted)
+                                    .foregroundStyle(SSColor.textSecondary)
                                     .frame(height: 56)
                             }
                         }
                         .padding(14)
                         .neumorphicCard()
+
+                        if !viewModel.topTriggers.isEmpty {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("Top triggers this month")
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(SSColor.textSecondary)
+                                HStack(spacing: 6) {
+                                    ForEach(viewModel.topTriggers, id: \.trigger) { entry in
+                                        Text("\(entry.trigger) (\(entry.count))")
+                                            .font(.system(size: 10, weight: .medium))
+                                            .foregroundStyle(SSColor.textPrimary)
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 5)
+                                            .neumorphicCard(radius: 20)
+                                    }
+                                }
+                            }
+                            .padding(14)
+                            .neumorphicCard()
+                        }
 
                         HStack(spacing: 10) {
                             StatTile(value: waterDisplay, label: "Water")
@@ -74,7 +96,7 @@ struct TrackerView: View {
                             } label: {
                                 Text("Log a crisis")
                                     .font(.system(size: 13, weight: .medium))
-                                    .foregroundStyle(Theme.accent)
+                                    .foregroundStyle(SSColor.brand)
                                     .frame(maxWidth: .infinity)
                                     .padding(13)
                             }
@@ -91,9 +113,9 @@ struct TrackerView: View {
                             } label: {
                                 Image(systemName: voiceLogger.isRecording ? "waveform" : "mic.fill")
                                     .font(.system(size: 15))
-                                    .foregroundStyle(voiceLogger.isRecording ? .white : Theme.deepRed)
+                                    .foregroundStyle(voiceLogger.isRecording ? .white : SSColor.brand)
                                     .frame(width: 46, height: 46)
-                                    .background(voiceLogger.isRecording ? AnyShapeStyle(Theme.deepRed) : AnyShapeStyle(Color.clear))
+                                    .background(voiceLogger.isRecording ? AnyShapeStyle(SSColor.brand) : AnyShapeStyle(Color.clear))
                             }
                             .neumorphicPressed(radius: 23)
                         }
@@ -102,10 +124,10 @@ struct TrackerView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(voiceLogger.isRecording ? "Listening..." : "Heard:")
                                     .font(.system(size: 10, weight: .medium))
-                                    .foregroundStyle(Theme.deepRed)
+                                    .foregroundStyle(SSColor.brand)
                                 Text(voiceLogger.transcript.isEmpty ? "Try \"pain 7, lower back, from the cold\"" : voiceLogger.transcript)
                                     .font(.system(size: 11))
-                                    .foregroundStyle(Theme.ink)
+                                    .foregroundStyle(SSColor.textPrimary)
                             }
                             .padding(10)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -114,20 +136,20 @@ struct TrackerView: View {
                         if let voiceError = voiceLogger.errorMessage {
                             Text(voiceError)
                                 .font(.system(size: 11))
-                                .foregroundStyle(Theme.deepRed)
+                                .foregroundStyle(SSColor.brand)
                         }
 
                         if showLogForm {
                             VStack(alignment: .leading, spacing: 10) {
                                 Text("Severity: \(Int(severity))")
                                     .font(.system(size: 11))
-                                    .foregroundStyle(Theme.muted)
+                                    .foregroundStyle(SSColor.textSecondary)
                                 Slider(value: $severity, in: 0...10, step: 1)
-                                    .tint(Theme.accent)
+                                    .tint(SSColor.brand)
 
                                 Text("Likely trigger")
                                     .font(.system(size: 11))
-                                    .foregroundStyle(Theme.muted)
+                                    .foregroundStyle(SSColor.textSecondary)
                                 HStack(spacing: 6) {
                                     ForEach(triggers, id: \.self) { trigger in
                                         TriggerChip(
@@ -143,10 +165,37 @@ struct TrackerView: View {
                                     }
                                 }
 
+                                Text("Where is the pain?")
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(SSColor.textSecondary)
+                                BodyMapPicker(selection: $bodyLocation)
+
+                                Text("Took a medication for this? (optional)")
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(SSColor.textSecondary)
+                                Menu {
+                                    Button("None") { selectedMedication = nil }
+                                    ForEach(viewModel.reminders) { reminder in
+                                        Button(reminder.medicineName) { selectedMedication = reminder.medicineName }
+                                    }
+                                } label: {
+                                    HStack {
+                                        Text(selectedMedication ?? "None")
+                                            .font(.system(size: 11))
+                                            .foregroundStyle(SSColor.textPrimary)
+                                        Spacer()
+                                        Image(systemName: "chevron.up.chevron.down")
+                                            .font(.system(size: 9))
+                                            .foregroundStyle(SSColor.textSecondary)
+                                    }
+                                    .padding(10)
+                                    .neumorphicCard(radius: 12)
+                                }
+
                                 if let errorMessage = viewModel.errorMessage {
                                     Text(errorMessage)
                                         .font(.system(size: 11))
-                                        .foregroundStyle(Theme.deepRed)
+                                        .foregroundStyle(SSColor.brand)
                                 }
 
                                 Button {
@@ -154,7 +203,8 @@ struct TrackerView: View {
                                         let saved = await viewModel.logCrisis(
                                             severity: Int(severity),
                                             triggers: Array(selectedTriggers),
-                                            location: voiceLocation ?? "Crisis"
+                                            location: bodyLocation ?? voiceLocation ?? "Crisis",
+                                            medicationTaken: selectedMedication
                                         )
                                         if saved {
                                             withAnimation {
@@ -162,6 +212,8 @@ struct TrackerView: View {
                                                 selectedTriggers.removeAll()
                                                 severity = 5
                                                 voiceLocation = nil
+                                                bodyLocation = nil
+                                                selectedMedication = nil
                                                 voiceLogger.transcript = ""
                                             }
                                         }
@@ -169,16 +221,16 @@ struct TrackerView: View {
                                 } label: {
                                     HStack {
                                         if viewModel.isSaving {
-                                            ProgressView().tint(Theme.background)
+                                            ProgressView().tint(SSColor.background)
                                         } else {
                                             Text("Save entry")
                                         }
                                     }
                                     .font(.system(size: 12))
-                                    .foregroundStyle(Theme.background)
+                                    .foregroundStyle(SSColor.background)
                                     .frame(maxWidth: .infinity)
                                     .padding(10)
-                                    .background(Theme.ink)
+                                    .background(SSColor.textPrimary)
                                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                                 }
                                 .disabled(viewModel.isSaving)
@@ -191,12 +243,16 @@ struct TrackerView: View {
                 }
             }
         }
-        .background(Theme.background.ignoresSafeArea())
+        .background(SSColor.background.ignoresSafeArea())
         .task {
             await viewModel.load()
         }
         .refreshable {
             await viewModel.load()
+        }
+        .onChange(of: router.selectedTab) { _, tab in
+            guard tab == .tracker else { return }
+            Task { await viewModel.load() }
         }
         .sheet(isPresented: $showShareSheet) {
             if let reportURL {
@@ -255,7 +311,7 @@ private struct TriggerChip: View {
         Button(action: action) {
             Text(title)
                 .font(.system(size: 10))
-                .foregroundStyle(Theme.ink)
+                .foregroundStyle(SSColor.textPrimary)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 5)
                 .background {
@@ -288,7 +344,7 @@ private struct PainTrendChart: View {
                     path.addLine(to: point)
                 }
             }
-            .stroke(Theme.accent, style: StrokeStyle(lineWidth: 2.2, lineCap: .round, lineJoin: .round))
+            .stroke(SSColor.brand, style: StrokeStyle(lineWidth: 2.2, lineCap: .round, lineJoin: .round))
         }
     }
 }

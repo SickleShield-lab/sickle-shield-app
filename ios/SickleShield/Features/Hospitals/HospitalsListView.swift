@@ -1,8 +1,25 @@
 import SwiftUI
 
+private enum HospitalSheetMode: Identifiable {
+    case add
+    case edit(Hospital)
+
+    var id: String {
+        switch self {
+        case .add: return "add"
+        case .edit(let hospital): return hospital.id
+        }
+    }
+
+    var hospital: Hospital? {
+        if case .edit(let hospital) = self { return hospital }
+        return nil
+    }
+}
+
 struct HospitalsListView: View {
     @State private var viewModel = HospitalsViewModel()
-    @State private var showAddSheet = false
+    @State private var sheetMode: HospitalSheetMode?
 
     var body: some View {
         List {
@@ -20,17 +37,33 @@ struct HospitalsListView: View {
                 } description: {
                     Text("Add a hospital to book appointments and keep its details handy.")
                 } actions: {
-                    Button("Add hospital") { showAddSheet = true }
+                    Button("Add hospital") {
+                        sheetMode = .add
+                    }
                 }
             } else {
                 ForEach(viewModel.hospitals) { hospital in
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(hospital.hospitalName)
-                            .font(.headline)
-                        Text(hospital.location)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                    Button {
+                        sheetMode = .edit(hospital)
+                    } label: {
+                        HStack(spacing: 12) {
+                            hospitalIcon(hospital)
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(hospital.hospitalName)
+                                    .font(.headline)
+                                    .foregroundStyle(SSColor.textPrimary)
+                                Text(hospital.location)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                                if let phone = hospital.emergencyContacts.first {
+                                    Text("Sickle Cell Unit: \(phone)")
+                                        .font(.caption)
+                                        .foregroundStyle(SSColor.textSecondary)
+                                }
+                            }
+                        }
                     }
+                    .buttonStyle(.plain)
                     .swipeActions {
                         Button("Delete", systemImage: "trash", role: .destructive) {
                             Task { await viewModel.delete(hospital) }
@@ -44,7 +77,7 @@ struct HospitalsListView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
-                    showAddSheet = true
+                    sheetMode = .add
                 } label: {
                     Image(systemName: "plus")
                 }
@@ -52,11 +85,19 @@ struct HospitalsListView: View {
         }
         .task { await viewModel.load() }
         .refreshable { await viewModel.load() }
-        .sheet(isPresented: $showAddSheet) {
-            AddHospitalSheet { name, location in
-                await viewModel.addHospital(name: name, location: location)
+        .sheet(item: $sheetMode) { mode in
+            HospitalFormSheet(existingHospital: mode.hospital) { saved in
+                viewModel.upsert(saved)
             }
         }
+    }
+
+    private func hospitalIcon(_ hospital: Hospital) -> some View {
+        Image(systemName: "cross.case.fill")
+            .foregroundStyle(SSColor.brand)
+            .frame(width: 44, height: 44)
+            .background(SSColor.surfaceSecondary)
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 }
 

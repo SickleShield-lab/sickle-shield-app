@@ -27,4 +27,14 @@ enum GoalAPI {
     static func deleteWeightGoal(id: String) async throws {
         try await APIClient.shared.requestVoid("goal/weight/\(id)", method: "DELETE")
     }
+
+    /// A single logged weight reading - distinct from the weight goal above.
+    static func logWeight(_ weight: Double) async throws -> WeightEntry {
+        let body = LogWeightRequest(weight: weight)
+        return try await APIClient.shared.request("goal/weight/log", method: "POST", body: body)
+    }
+
+    static func weightHistory(days: Int = 30) async throws -> [WeightEntry] {
+        try await APIClient.shared.request("goal/weight/history", method: "GET", query: ["days": String(days)])
+    }
 }

@@ -22,6 +22,11 @@ enum MedicationAPI {
         try await APIClient.shared.request("medication/reminders/my-reminders", method: "GET")
     }
 
+    static func updateReminderTime(id: String, reminderTime: String) async throws {
+        let body = UpdateReminderTimeRequest(reminderTime: reminderTime)
+        try await APIClient.shared.requestVoid("medication/reminders/\(id)", method: "PATCH", body: body)
+    }
+
     static func deleteReminder(id: String) async throws {
         try await APIClient.shared.requestVoid("medication/reminders/\(id)", method: "DELETE")
     }
