@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
+import { JsonWebTokenError } from "jsonwebtoken";
 import { ZodError } from "zod";
 import config from "../../config";
 import { IGenericErrorMessage } from "../../interfaces/error";
@@ -41,6 +42,20 @@ const GlobalErrorHandler = (
     statusCode = simplifiedError.statusCode;
     message = simplifiedError.message;
     errorMessages = simplifiedError.errorMessages;
+  }
+
+  // Handle expired/invalid JWTs as 401s so clients can prompt a re-login,
+  // rather than falling through to the generic Error branch as a 500 with
+  // the raw jsonwebtoken message ("jwt expired", "jwt malformed", etc).
+  else if (error instanceof JsonWebTokenError) {
+    statusCode = httpStatus.UNAUTHORIZED;
+    message = "Your session has expired. Please log in again.";
+    errorMessages = [
+      {
+        path: "",
+        message,
+      },
+    ];
   }
 
   // Handle Custom ApiError
