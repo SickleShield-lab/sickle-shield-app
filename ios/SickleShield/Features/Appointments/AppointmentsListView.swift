@@ -31,19 +31,30 @@ struct AppointmentsListView: View {
                 }
             } else {
                 ForEach(viewModel.appointments) { appointment in
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(viewModel.hospitalName(for: appointment))
-                            .font(.headline)
-                        Text("\(Self.dateFormatter.string(from: appointment.date)) · \(appointment.shift) · \(appointment.time)")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                        if let doctorName = appointment.doctorName, !doctorName.isEmpty {
-                            Text(doctorName)
-                                .font(.footnote)
+                    HStack(alignment: .top) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(viewModel.hospitalName(for: appointment))
+                                .font(.headline)
+                            if let type = appointment.type, !type.isEmpty {
+                                Text(type)
+                                    .font(.subheadline)
+                                    .foregroundStyle(SSColor.brand)
+                            }
+                            Text("\(Self.dateFormatter.string(from: appointment.date)) · \(appointment.shift) · \(appointment.time)")
+                                .font(.subheadline)
                                 .foregroundStyle(.secondary)
+                            if let doctorName = appointment.doctorName, !doctorName.isEmpty {
+                                Text(doctorName)
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Text(appointment.status.capitalized)
+                                .font(.caption)
+                                .foregroundStyle(SSColor.brand)
                         }
-                        Text(appointment.status.capitalized)
-                            .font(.caption)
+                        Spacer()
+                        Text(appointment.countdownText)
+                            .font(.system(.caption, weight: .semibold))
                             .foregroundStyle(SSColor.brand)
                     }
                     .swipeActions {
@@ -69,8 +80,11 @@ struct AppointmentsListView: View {
         .task { await viewModel.load() }
         .refreshable { await viewModel.load() }
         .sheet(isPresented: $showAddSheet) {
-            AddAppointmentSheet(hospitals: viewModel.hospitals) { hospitalId, doctorName, date, shift, time in
-                await viewModel.addAppointment(hospitalId: hospitalId, doctorName: doctorName, date: date, shift: shift, time: time)
+            AddAppointmentSheet(hospitals: viewModel.hospitals) { hospitalId, doctorName, type, date, shift, time, remindThreeDaysBefore, remindTwoDaysBefore in
+                await viewModel.addAppointment(
+                    hospitalId: hospitalId, doctorName: doctorName, type: type, date: date, shift: shift, time: time,
+                    remindThreeDaysBefore: remindThreeDaysBefore, remindTwoDaysBefore: remindTwoDaysBefore
+                )
             }
         }
     }

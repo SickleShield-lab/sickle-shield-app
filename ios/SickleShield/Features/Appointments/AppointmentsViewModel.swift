@@ -23,16 +23,35 @@ final class AppointmentsViewModel {
     }
 
     @discardableResult
-    func addAppointment(hospitalId: String, doctorName: String, date: Date, shift: String, time: String) async -> Bool {
+    func addAppointment(
+        hospitalId: String,
+        doctorName: String,
+        type: String,
+        date: Date,
+        shift: String,
+        time: String,
+        remindThreeDaysBefore: Bool,
+        remindTwoDaysBefore: Bool
+    ) async -> Bool {
         do {
             let appointment = try await AppointmentAPI.create(
                 hospitalId: hospitalId,
                 doctorName: doctorName.isEmpty ? nil : doctorName,
+                type: type.isEmpty ? nil : type,
                 date: date,
                 shift: shift,
                 time: time
             )
             appointments.insert(appointment, at: 0)
+            await LocalNotificationScheduler.requestAuthorizationIfNeeded()
+            LocalNotificationScheduler.scheduleAppointmentReminders(
+                appointmentId: appointment.id,
+                hospitalName: hospitalName(for: appointment),
+                date: appointment.date,
+                time: appointment.time,
+                includeThreeDaysBefore: remindThreeDaysBefore,
+                includeTwoDaysBefore: remindTwoDaysBefore
+            )
             return true
         } catch {
             errorMessage = error.localizedDescription
@@ -44,6 +63,7 @@ final class AppointmentsViewModel {
         do {
             try await AppointmentAPI.delete(id: appointment.id)
             appointments.removeAll { $0.id == appointment.id }
+            LocalNotificationScheduler.cancelAppointmentReminders(appointmentId: appointment.id)
         } catch {
             errorMessage = error.localizedDescription
         }

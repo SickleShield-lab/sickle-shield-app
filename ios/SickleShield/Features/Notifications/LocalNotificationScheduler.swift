@@ -135,4 +135,88 @@ enum LocalNotificationScheduler {
         formatter.dateFormat = "yyyy-MM-dd"
         return formatter.string(from: date)
     }
+
+    // MARK: - Appointment reminders
+
+    /// Offsets that can fire before an appointment. 24h is always included
+    /// by callers; 3-day/2-day are opt-in toggles shown in the add-appointment
+    /// form.
+    private enum AppointmentOffset: CaseIterable {
+        case threeDaysBefore, twoDaysBefore, twentyFourHoursBefore
+
+        var seconds: TimeInterval {
+            switch self {
+            case .threeDaysBefore: return 3 * 24 * 3600
+            case .twoDaysBefore: return 2 * 24 * 3600
+            case .twentyFourHoursBefore: return 24 * 3600
+            }
+        }
+
+        var label: String {
+            switch self {
+            case .threeDaysBefore: return "3d"
+            case .twoDaysBefore: return "2d"
+            case .twentyFourHoursBefore: return "24h"
+            }
+        }
+    }
+
+    private static func appointmentIdentifier(_ appointmentId: String, offset: AppointmentOffset) -> String {
+        "appointment-\(appointmentId)-\(offset.label)"
+    }
+
+    /// Merges the appointment's date with its separately-stored time string
+    /// (e.g. "10:30 AM") into a single moment to compute reminder offsets from.
+    private static func appointmentDateTime(date: Date, time: String) -> Date? {
+        guard let timeOfDay = timeComponents(from: time) else { return nil }
+        var components = Calendar.current.dateComponents([.year, .month, .day], from: date)
+        components.hour = timeOfDay.hour
+        components.minute = timeOfDay.minute
+        return Calendar.current.date(from: components)
+    }
+
+    /// Always schedules a 24-hours-before reminder; 3-day/2-day-before are
+    /// opt-in. Past-due offsets (e.g. booking an appointment less than a day
+    /// out) are silently skipped rather than firing immediately.
+    static func scheduleAppointmentReminders(
+        appointmentId: String,
+        hospitalName: String,
+        date: Date,
+        time: String,
+        includeThreeDaysBefore: Bool,
+        includeTwoDaysBefore: Bool
+    ) {
+        guard let appointmentMoment = appointmentDateTime(date: date, time: time) else { return }
+        let now = Date()
+
+        var offsetsToSchedule: [AppointmentOffset] = [.twentyFourHoursBefore]
+        if includeThreeDaysBefore { offsetsToSchedule.append(.threeDaysBefore) }
+        if includeTwoDaysBefore { offsetsToSchedule.append(.twoDaysBefore) }
+
+        for offset in offsetsToSchedule {
+            let fireDate = appointmentMoment.addingTimeInterval(-offset.seconds)
+            guard fireDate > now else { continue }
+
+            let content = UNMutableNotificationContent()
+            content.title = "Upcoming appointment"
+            content.body = "You have an appointment at \(hospitalName) on \(Self.appointmentDateFormatter.string(from: appointmentMoment)) at \(time)."
+            content.sound = .default
+
+            let fireComponents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: fireDate)
+            let trigger = UNCalendarNotificationTrigger(dateMatching: fireComponents, repeats: false)
+            let request = UNNotificationRequest(identifier: appointmentIdentifier(appointmentId, offset: offset), content: content, trigger: trigger)
+            UNUserNotificationCenter.current().add(request)
+        }
+    }
+
+    static func cancelAppointmentReminders(appointmentId: String) {
+        let identifiers = AppointmentOffset.allCases.map { appointmentIdentifier(appointmentId, offset: $0) }
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
+    }
+
+    private static let appointmentDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d"
+        return formatter
+    }()
 }

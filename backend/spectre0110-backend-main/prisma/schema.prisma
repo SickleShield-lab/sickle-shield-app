@@ -92,6 +92,7 @@ model Appointment {
   userId     String
   hospitalId String
   doctorName String?
+  type       String?
   date       DateTime
   shift      String
   time       String

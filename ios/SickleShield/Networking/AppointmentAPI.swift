@@ -5,8 +5,8 @@ enum AppointmentAPI {
         try await APIClient.shared.request("appointment/my-appointments", method: "GET")
     }
 
-    static func create(hospitalId: String, doctorName: String?, date: Date, shift: String, time: String) async throws -> Appointment {
-        let body = CreateAppointmentRequest(doctorName: doctorName, date: date, shift: shift, time: time)
+    static func create(hospitalId: String, doctorName: String?, type: String?, date: Date, shift: String, time: String) async throws -> Appointment {
+        let body = CreateAppointmentRequest(doctorName: doctorName, type: type, date: date, shift: shift, time: time)
         return try await APIClient.shared.request("appointment/create/\(hospitalId)", method: "POST", body: body)
     }
 

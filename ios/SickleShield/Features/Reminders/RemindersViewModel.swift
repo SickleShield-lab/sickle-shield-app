@@ -39,6 +39,21 @@ final class RemindersViewModel: ObservableObject {
         }
     }
 
+    /// `load()` re-syncs every reminder's local notification against the
+    /// freshly-fetched list, so the identifier (keyed on `reminder.id`,
+    /// unchanged by this update) picks up the new time automatically.
+    @discardableResult
+    func updateReminderTime(_ reminder: Reminder, time: String) async -> Bool {
+        do {
+            try await MedicationAPI.updateReminderTime(id: reminder.id, reminderTime: time)
+            await load()
+            return true
+        } catch {
+            errorMessage = error.localizedDescription
+            return false
+        }
+    }
+
     func delete(_ reminder: Reminder) async {
         do {
             try await MedicationAPI.deleteReminder(id: reminder.id)

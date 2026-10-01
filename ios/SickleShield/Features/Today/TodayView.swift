@@ -307,9 +307,14 @@ struct TodayView: View {
                     }
                 }
                 Spacer()
-                Image(systemName: "calendar")
-                    .font(.system(.title3))
-                    .foregroundStyle(SSColor.brand)
+                VStack(alignment: .trailing, spacing: 4) {
+                    Image(systemName: "calendar")
+                        .font(.system(.title3))
+                        .foregroundStyle(SSColor.brand)
+                    Text(appointment.countdownText)
+                        .font(.system(.caption2, weight: .semibold))
+                        .foregroundStyle(SSColor.brand)
+                }
             }
             .ssCard()
         }
